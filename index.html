@@ -1,5 +1,17 @@
 <html>
     <head>
+         <link rel="manifest" href="/manifest.json">
+        <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
+        <script>
+        var OneSignal = window.OneSignal || [];
+        OneSignal.push(["init", {
+          appId: "3cec8164-a8be-458f-93d3-5955fdc58c83",
+          autoRegister: false,
+          notifyButton: {
+            enable: true /* Set to false to hide */
+          }
+        }]);
+        </script>
         <script src="bower_components/bootstrap-css/js/bootstrap.js"></script>
         <link rel="stylesheet" href="bower_components/bootstrap-css/css/bootstrap.css">
     </head>
