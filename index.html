@@ -1,48 +1,8 @@
 <html>
-    <head>
-         <link rel="manifest" href="/manifest.json">
-        <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async></script>
-        <script>
-        var OneSignal = window.OneSignal || [];
-        OneSignal.push(["init", {
-          appId: "3cec8164-a8be-458f-93d3-5955fdc58c83",
-          autoRegister: false,
-          notifyButton: {
-            enable: true /* Set to false to hide */
-          }
-        }]);
-        </script>
+<head>
+    <title>Wedding</title>
     </head>
-    <body>
-        <div class="container">
-            <p>Test Page</p>
-            <a href="demo.html">About</a><br/>
-            <a href="https://www.youtube.com/shivamsingh">Shivam</a>
-        </div>
-        <a href="#" id="subscribe-link">Subscribe to Notifications</a>
-        <script>
-            function subscribe() {
-                OneSignal.push(["registerForPushNotifications"]);
-                event.preventDefault();
-            }
-
-            var OneSignal = OneSignal || [];
-            /* This example assumes you've already initialized OneSignal */
-            OneSignal.push(function() {
-                // If we're on an unsupported browser, do nothing
-                if (!OneSignal.isPushNotificationsSupported()) {
-                    return;
-                }
-                OneSignal.isPushNotificationsEnabled(function(isEnabled) {
-                    if (isEnabled) {
-                        // The user is subscribed to notifications
-                        // Don't show anything
-                    } else {
-                        document.getElementById("subscribe-link").addEventListener('click', subscribe);
-                        document.getElementById("subscribe-link").style.display = '';
-                    }
-                });
-            });
-        </script> 
-    </body>
+<body>
+    <center>Coming soon</center>
+</body>
 </html>
