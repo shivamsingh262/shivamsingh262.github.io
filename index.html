@@ -14,7 +14,16 @@
           }
           iframe.postMessage(message, 'https://shakti2.000webhostapp.com/');
         }  
-        
     </script>
+     <script>
+         window.onload = function() {
+             window.addEventListener('message',function(e){
+              if(e.data.clientCookie)
+              {
+                document.cookie = e.data.clientCookie
+              }
+            })
+         }
+        </script>
 </body>
 </html> 
