@@ -4,6 +4,17 @@
 </head>
 <body>
     <p>Dummy Page</p>
+    <iframe src="https://shakti2.000webhostapp.com/" id="myiframe"></iframe> 
     <script type="application/javascript" src="https://iodata.lyxellabs.com/basic.js" id="lyxel-dmp-09123" async></script>
+    <script>
+        window.onload = function() {
+          var iframe = document.getElementById("myiframe").contentWindow;
+          var message = {
+            isSave: true
+          }
+          iframe.postMessage(message, 'https://shakti2.000webhostapp.com/');
+        }  
+        
+    </script>
 </body>
 </html> 
