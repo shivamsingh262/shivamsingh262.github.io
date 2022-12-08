@@ -3,10 +3,135 @@
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Test</title>
+    <title>Mike Wazowski</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <style>
+    * {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+}
+
+body {
+	height: 100vh;
+	background: #18544b;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.mike-wazowski {
+	font-size: 2vmin;
+	width: 17em;
+	aspect-ratio: 15 / 9;
+	margin-top: -18em;
+	box-shadow: 0 2.5em .5em .1em #ffe4c4, 0 2em 0 .4em #444;
+	position: relative;
+	border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+	filter: drop-shadow( 0 0 1em rgba( 0,0,0,.5 ) );
+}
+
+.mike-wazowski::before {
+	content: '';
+	position: absolute;
+	height: 21em;
+	width: 20em;
+	top: 5em;
+	left: 50%;
+	margin-left: -10em;
+	background: 
+		
+		/* teeth */
+		radial-gradient(
+			ellipse 50% 50% at 50% 100%,
+			#FFF 94%,
+			transparent 100%
+		) left calc( 50% - 1.5em ) bottom 3em / 1.5em 1.2em,
+		
+		radial-gradient(
+			ellipse 50% 50% at 50% 100%,
+			#FFF 94%,
+			transparent 100%
+		) left 50% bottom 3em / 1.5em 1.2em,
+		
+		radial-gradient(
+			ellipse 50% 50% at 50% 100%,
+			#FFF 94%,
+			transparent 100%
+		) left calc( 50% + 1.5em ) bottom 3em / 1.5em 1.2em,
+		
+		/* mouth */
+		radial-gradient(
+			ellipse 1.5em 1em at 50% 100%,
+			#fe5466 97%,
+			transparent 100%
+		) left 50% bottom 3em / 8em 3em,
+		
+		radial-gradient(
+			ellipse 3em 2.5em at 50% 100%,
+			#3d3b49 97%,
+			transparent 100%
+		) left 50% bottom 3em / 8em 3em,
+		
+		/* pupil */
+		radial-gradient(
+			ellipse 50% 50%,
+			#FFF 95%,
+			transparent 100%
+		) calc( 50% - .8em ) 6em / 1em 1em,
+		
+		radial-gradient(
+			ellipse 50% 50%,
+			#3d3b49 50%,
+			#0aa9cc 52%,
+			#0aa9cc 100%,
+			transparent 102%
+		) 50% 4em / 6em 6em,
+		
+		/* eye ball */
+		radial-gradient(
+			ellipse 50% 80% at 50% 110%,
+			#FFF 100%,
+			transparent 101%
+		) 50% 2em / 12em 5em,
+		
+		radial-gradient(
+			ellipse 50% 80% at 50% -10%,
+			#FFF 100%,
+			transparent 101%
+		) 50% 7em / 12em 5em;
+	
+	background-repeat: no-repeat;
+	background-color: #a2c44f;
+	border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+}
+
+.mike-wazowski::after {
+	content: '';
+	display: block;
+	position: absolute;
+	left: 50%;
+	top: 8em;
+	margin-left: -6em;
+	background: #a2c44f;
+	height: 8em;
+	width: 12em;
+	transform-origin: 50% 0;
+	animation: blink 3s both infinite;
+}
+
+@keyframes blink {
+	0%, 20%, 100% {
+		transform: scaleY( 0 );
+	}
+	
+	10% {
+		transform: scaleY( 1 );
+	}
+}
+    </style>
 </head>
 <body>
-    <h1>Test Page</h1>
+    <div class="mike-wazowski"></div>
 </body>
 </html>
