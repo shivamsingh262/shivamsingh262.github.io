@@ -46,12 +46,12 @@ const CSS = `
 @font-face { font-family:'Source Serif 4'; font-style:normal; font-weight:400 700; font-display:swap; src:url('/fonts/source-serif-latin.woff2') format('woff2'); }
 :root {
   color-scheme: light dark;
-  --bg:#ffffff; --surface:#f5f7fb; --fg:#1f2430; --muted:#596175; --accent:#1a2b4c; --accent-2:#3a5694;
+  --bg:#ffffff; --surface:#f5f7fb; --fg:#1f2430; --soft:#3c4354; --muted:#596175; --accent:#1a2b4c; --accent-2:#3a5694;
   --rule:#e2e6ee; --chip:#e9eef7; --focus:#3a5694; --dot:#c6cfdd; --dot-hot:#3a5694;
   --c-ai:#3a5694; --c-code:#7a4fb0; --c-database:#1f7a6d; --c-cloud:#b06a1f; --c-chart:#b0436a; --c-people:#3a5694;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg:#0e131d; --surface:#151c2a; --fg:#e4e8f0; --muted:#9ba4b6; --accent:#d3def5; --accent-2:#94acdf; --rule:#253044; --chip:#1d2638; --focus:#94acdf; --dot:#33405c; --dot-hot:#94acdf;
+  :root { --bg:#0e131d; --surface:#151c2a; --fg:#e4e8f0; --soft:#c3cad8; --muted:#9ba4b6; --accent:#d3def5; --accent-2:#94acdf; --rule:#253044; --chip:#1d2638; --focus:#94acdf; --dot:#33405c; --dot-hot:#94acdf;
     --c-ai:#94acdf; --c-code:#b9a0e6; --c-database:#7fcbbd; --c-cloud:#e3ad6e; --c-chart:#e594b2; --c-people:#94acdf; }
 }
 * { box-sizing:border-box; margin:0; padding:0; }
@@ -112,14 +112,28 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
 .marker { position:absolute; left:-28px; top:8px; width:12px; height:12px; border-radius:50%; border:2px solid var(--accent-2); background:var(--accent-2); transition:background-color .3s; }
 .timeline.is-live .marker:not(.is-on) { background:var(--bg); }
 .job { position:relative; }
-.job + .job { margin-top:26px; }
+.job + .job { margin-top:34px; }
 .job-head { display:flex; justify-content:space-between; align-items:baseline; gap:4px 16px; flex-wrap:wrap; }
-.job h3, .edu h3 { font-size:18px; font-weight:650; color:var(--accent); line-height:1.35; }
+.job h3, .edu h3 { font-size:18px; font-weight:650; color:var(--accent); line-height:1.35; text-wrap:balance; }
 .org { color:var(--accent-2); font-weight:600; font-size:15px; }
 .dates { font-size:14px; color:var(--muted); white-space:nowrap; font-variant-numeric:tabular-nums; }
-.job ul { margin-top:8px; padding-left:20px; }
-.job li { margin-top:4px; max-width:72ch; }
-.job li::marker { color:var(--muted); }
+.job-meta { display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 8px; margin-top:2px; }
+.job-meta .sep { color:var(--rule); }
+.when { display:inline-flex; align-items:baseline; gap:8px; white-space:nowrap; }
+.tenure { font-size:13px; color:var(--muted); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.tenure::before { content:"·"; margin-right:6px; }
+.now { align-self:center; font-size:11px; font-weight:600; line-height:1; letter-spacing:.06em; text-transform:uppercase; padding:4px 7px; border-radius:999px; background:var(--chip); color:var(--accent-2); }
+.stats { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.stat { display:inline-flex; align-items:baseline; gap:6px; padding:6px 10px; border-radius:8px; background:var(--surface); border:1px solid var(--rule); font-size:13px; color:var(--muted); white-space:nowrap; }
+.stat b { font-size:15px; font-weight:700; line-height:1; color:var(--accent); font-variant-numeric:tabular-nums; }
+.groups { display:grid; gap:16px; margin-top:16px; }
+.group { display:grid; grid-template-columns:96px minmax(0, 1fr); gap:6px 16px; align-items:start; }
+.group-label { padding-top:3px; font-size:11.5px; font-weight:600; line-height:1.4; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.points { list-style:none; padding:0; margin-top:14px; display:grid; gap:10px; max-width:64ch; }
+.group .points { margin-top:0; }
+.points li { position:relative; padding-left:16px; font-size:15.5px; color:var(--soft); }
+.points li::before { content:""; position:absolute; left:0; top:.75em; width:6px; height:2px; border-radius:2px; background:var(--accent-2); }
+.points strong { color:var(--fg); font-weight:600; }
 
 .projects { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap:16px; }
 .card { display:flex; flex-direction:column; gap:10px; padding:18px; border:1px solid var(--rule); border-radius:12px; background:var(--surface); }
@@ -195,12 +209,15 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
   .nav { gap:14px; }
   .skills { grid-template-columns:minmax(0, 1fr); }
   .skill-list { grid-template-columns:minmax(0, 1fr); }
+  .group { grid-template-columns:minmax(0, 1fr); }
+  .job-meta { flex-direction:column; align-items:flex-start; }
+  .job-meta .sep { display:none; }
 }
 @media print {
   .site-header, .links, .site-footer, .skip, .field, .copy, .deck-bar, .rail { display:none; }
   .hero-visual { width:auto; height:auto; }
   section { break-inside:auto; }
-  .card, .job-head { break-inside:avoid; }
+  .card, .job-head, .group { break-inside:avoid; }
 }
 `;
 
@@ -325,6 +342,67 @@ function renderSkillGroup(group, opts) {
     </article>`;
 }
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+// "Jan 2025 – Present" -> { start: [2025, 0], end: null }; null if it doesn't parse.
+function parseDates(dates = '') {
+  const [from, to] = dates.split(/\s+[–-]\s+/);
+  const ym = (s) => {
+    const m = /^(\w{3})\w*\s+(\d{4})$/.exec(s?.trim() || '');
+    return m && MONTHS.includes(m[1]) ? [Number(m[2]), MONTHS.indexOf(m[1])] : null;
+  };
+  const start = ym(from);
+  if (!start) return null;
+  const end = ym(to);
+  return end || /present/i.test(to || '') ? { start, end } : null;
+}
+
+// Counts both the first and last month, so Jan 2025 to Oct 2026 is "1 yr 10 mo".
+// static/js/motion.js has the same sum, to keep the current role up to date
+// between rebuilds.
+function tenure(start, end, now = new Date()) {
+  const [ey, em] = end || [now.getUTCFullYear(), now.getUTCMonth()];
+  const months = (ey - start[0]) * 12 + (em - start[1]) + 1;
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  return [y && `${y} yr`, m && `${m} mo`].filter(Boolean).join(' ');
+}
+
+// One role on the timeline. site.config.json can bold the opening words of each
+// bullet (`leads`), add number tiles (`stats`) and sort bullets into labelled
+// groups (`groups`). The bullet text itself always comes from resume.json unchanged.
+function renderJob(job, opts) {
+  const span = parseDates(job.dates);
+  const current = span && !span.end;
+  const point = (b, i) => {
+    const lead = opts.leads?.[i];
+    return lead && b.startsWith(lead) ? `<li><strong>${esc(lead)}</strong>${esc(b.slice(lead.length))}</li>` : `<li>${esc(b)}</li>`;
+  };
+  const points = (idx) => `<ul class="points">${idx.map((i) => point(job.bullets[i], i)).join('')}</ul>`;
+  const all = job.bullets.map((_, i) => i);
+  const grouped = opts.groups?.flatMap(([, idx]) => idx).sort((a, b) => a - b).join() === all.join();
+  const body = !job.bullets.length
+    ? ''
+    : grouped
+      ? `<div class="groups">${opts.groups
+          .map(([name, idx]) => `<div class="group"><div class="group-label">${esc(name)}</div>${points(idx)}</div>`)
+          .join('')}</div>`
+      : points(all);
+  const stats = opts.stats?.length
+    ? `<div class="stats" aria-hidden="true">${opts.stats.map(([n, label]) => `<span class="stat"><b>${esc(n)}</b>${esc(label)}</span>`).join('')}</div>`
+    : '';
+  return `
+    <article class="job">
+      <span class="marker" aria-hidden="true"></span>
+      <h3>${esc(job.title)}</h3>
+      <div class="job-meta">
+        <span class="org">${esc(job.company)}</span>
+        ${job.dates ? `<span class="sep" aria-hidden="true">/</span><span class="when"><span class="dates">${esc(job.dates)}</span>${span ? `<span class="tenure"${current ? ` data-start="${span.start[0]}-${span.start[1] + 1}"` : ''}>${tenure(span.start, span.end)}</span>` : ''}${current ? '<span class="now">Now</span>' : ''}</span>` : ''}
+      </div>
+      ${stats}${body}
+    </article>`;
+}
+
 export function renderHome({ config, resume, projects, notes }) {
   const li = linkedinOf(resume);
   const links = [
@@ -334,20 +412,7 @@ export function renderHome({ config, resume, projects, notes }) {
     resume.email ? `<a class="button" href="mailto:${esc(resume.email)}">${ICONS.email}Email</a>` : '',
   ].filter(Boolean);
 
-  const experience = resume.experience
-    .map(
-      (job) => `
-    <article class="job">
-      <span class="marker" aria-hidden="true"></span>
-      <div class="job-head">
-        <h3>${esc(job.title)}</h3>
-        ${job.dates ? `<span class="dates">${esc(job.dates)}</span>` : ''}
-      </div>
-      <div class="org">${esc(job.company)}</div>
-      ${job.bullets.length ? `<ul>${job.bullets.map((b) => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}
-    </article>`
-    )
-    .join('');
+  const experience = resume.experience.map((job) => renderJob(job, config.experience?.[job.title] || {})).join('');
 
   const education = resume.education
     .map(

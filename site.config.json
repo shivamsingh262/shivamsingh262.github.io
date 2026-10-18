@@ -12,6 +12,41 @@
     "Marketing & Analytics": { "note": "where data comes from", "icon": "chart" },
     "Leadership": { "note": "steers the work", "icon": "people", "wide": true, "list": true }
   },
+  "experience": {
+    "Director, AI Initiatives": {
+      "stats": [["10–20", "engineers led"], ["4", "AI systems built"]],
+      "groups": [["Direction", [0]], ["Shipped", [1, 2, 3, 4]], ["Team", [5, 6]]],
+      "leads": [
+        "Set AI strategy and R&D direction",
+        "Built an agentic AI platform",
+        "Designed the underlying agent framework",
+        "Shipped an AI-powered social listening tool",
+        "Scoped and leading development of an AI audit automation system",
+        "Work closely with product and design",
+        "Hire, mentor, and set technical direction"
+      ]
+    },
+    "Leader, Products Team (Head of Technology)": {
+      "stats": [["100+", "campaigns"], ["50+", "data sources"], ["20k", "USD MRR"], ["M+", "records / month"]],
+      "groups": [["Platform", [0, 1, 2]], ["Business", [3, 4, 6]], ["Team", [5, 7]]],
+      "leads": [
+        "Owned engineering for Weavr",
+        "Modernised the backend",
+        "Built pipelines ingesting millions of records a month",
+        "Owned client engagements end to end for Weavr",
+        "Prepared quarterly estimates and managed PO cycles",
+        "Managed team salaries, appraisal cycles, competency frameworks, and hiring",
+        "Procured and managed vendor relationships",
+        "Ran architecture reviews, sprint planning, and mentoring"
+      ]
+    },
+    "Senior Developer – Full Stack": {
+      "leads": ["Built a KPI dashboard", "Built a real-time bidding (RTB) system", "Built a complaint-tracking tool"]
+    },
+    "Assistant Systems Engineer": {
+      "leads": ["Built and maintained client applications"]
+    }
+  },
   "projects": [
     { "repo": "tailyard", "install": "brew install shivamsingh262/tap/tailyard" },
     { "repo": "moodline" },

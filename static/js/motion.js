@@ -100,6 +100,34 @@ function initTimeline(timeline) {
   });
 }
 
+// Experience roles: number tiles count up and bullet groups slide in as each
+// role scrolls into view. Only for roles below the fold.
+function initJobs(timeline) {
+  for (const job of timeline.querySelectorAll('.job')) {
+    if (!belowFold(job)) continue;
+    const tl = createTimeline({ autoplay: onScroll({ target: job, enter: 'bottom-=60 top' }) })
+      .add(job.querySelectorAll('.stat'), { y: [10, 0], opacity: [0, 1], duration: 450, ease: 'outBack(1.6)' }, stagger(60))
+      .add(job.querySelectorAll('.group, :scope > .points'), { x: [-12, 0], opacity: [0.2, 1], duration: 550, ease: 'outQuart' }, stagger(110, { start: 150 }));
+    for (const b of job.querySelectorAll('.stat b')) {
+      const [, n, rest] = /^(\d+)(.*)$/.exec(b.textContent) || [];
+      if (!n) continue;
+      const count = { v: 0 };
+      tl.add(count, { v: Number(n), duration: 900, ease: 'outExpo', modifier: Math.round, onUpdate: () => { b.textContent = count.v + rest; } }, 50);
+    }
+  }
+}
+
+// The current role's time in role is written at build time (the site rebuilds
+// weekly); this keeps it exact between rebuilds. Same sum as tenure() in
+// src/templates.mjs.
+function updateTenure(el) {
+  const [y, m] = el.dataset.start.split('-').map(Number);
+  const now = new Date();
+  const months = (now.getFullYear() - y) * 12 + (now.getMonth() + 1 - m) + 1;
+  const parts = [Math.floor(months / 12) && `${Math.floor(months / 12)} yr`, months % 12 && `${months % 12} mo`];
+  el.textContent = parts.filter(Boolean).join(' ');
+}
+
 // About: words go from faint to full ink as the paragraph scrolls into view.
 function initSummary(summary) {
   if (!belowFold(summary)) return;
@@ -314,10 +342,12 @@ function initCopy(pre) {
 }
 
 document.querySelectorAll('.card pre').forEach(initCopy);
+document.querySelectorAll('.tenure[data-start]').forEach(updateTenure);
 
 if (motionOK) {
   document.querySelectorAll('.field').forEach(initField);
   document.querySelectorAll('.timeline').forEach(initTimeline);
+  document.querySelectorAll('.timeline').forEach(initJobs);
   const summary = document.querySelector('.summary');
   if (summary) initSummary(summary);
   const skills = document.querySelector('.skills');
