@@ -312,7 +312,7 @@ function jsonLd({ config, resume }) {
       image: `${config.url}/${resume.photo}`,
       email: resume.email ? `mailto:${resume.email}` : undefined,
       address: resume.location ? { '@type': 'PostalAddress', addressLocality: resume.location.split(',')[0].trim(), addressCountry: 'IN' } : undefined,
-      worksFor: company ? { '@type': 'Organization', name: company, url: config.companyUrl } : undefined,
+      worksFor: company ? { '@type': 'Organization', name: company, alternateName: config.companyAlternateName, url: config.companyUrl } : undefined,
       alumniOf: resume.education.map((e) => ({ '@type': 'CollegeOrUniversity', name: e.school })),
       knowsAbout: [...new Set(resume.skills.flatMap((g) => g.items.join(', ').split(',').map((s) => s.trim()).filter(Boolean)))],
       sameAs: [`https://github.com/${config.githubUser}`, li?.url].filter(Boolean),
