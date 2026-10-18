@@ -15,6 +15,18 @@ const ICONS = {
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>',
   star:
     '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>',
+  ai:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><rect x="7" y="7" width="10" height="10" rx="2"/><path d="M10 10h4v4h-4z"/></svg>',
+  code:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M13.5 6l-3 12"/></svg>',
+  database:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg>',
+  cloud:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/></svg>',
+  chart:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  people:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0M16 4a3 3 0 0 1 0 6M21 20a6 6 0 0 0-4-5.6"/></svg>',
   rss:
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>',
 };
@@ -36,9 +48,11 @@ const CSS = `
   color-scheme: light dark;
   --bg:#ffffff; --surface:#f5f7fb; --fg:#1f2430; --muted:#596175; --accent:#1a2b4c; --accent-2:#3a5694;
   --rule:#e2e6ee; --chip:#e9eef7; --focus:#3a5694; --dot:#c6cfdd; --dot-hot:#3a5694;
+  --c-ai:#3a5694; --c-code:#7a4fb0; --c-database:#1f7a6d; --c-cloud:#b06a1f; --c-chart:#b0436a; --c-people:#3a5694;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg:#0e131d; --surface:#151c2a; --fg:#e4e8f0; --muted:#9ba4b6; --accent:#d3def5; --accent-2:#94acdf; --rule:#253044; --chip:#1d2638; --focus:#94acdf; --dot:#33405c; --dot-hot:#94acdf; }
+  :root { --bg:#0e131d; --surface:#151c2a; --fg:#e4e8f0; --muted:#9ba4b6; --accent:#d3def5; --accent-2:#94acdf; --rule:#253044; --chip:#1d2638; --focus:#94acdf; --dot:#33405c; --dot-hot:#94acdf;
+    --c-ai:#94acdf; --c-code:#b9a0e6; --c-database:#7fcbbd; --c-cloud:#e3ad6e; --c-chart:#e594b2; --c-people:#94acdf; }
 }
 * { box-sizing:border-box; margin:0; padding:0; }
 html { -webkit-text-size-adjust:100%; scroll-behavior:smooth; scroll-padding-top:72px; }
@@ -134,9 +148,19 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
 .topics li { font-size:12px; padding:2px 8px; border-radius:999px; background:var(--chip); color:var(--accent-2); }
 .more { margin-top:16px; font-size:15px; }
 
-.skills { display:grid; grid-template-columns:minmax(150px, max-content) 1fr; gap:10px 24px; }
-.skills dt { font-weight:600; }
-.skills dd { color:var(--fg); }
+.skills { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
+.skill-group { display:grid; gap:12px; align-content:start; min-width:0; padding:16px 16px 18px; border:1px solid var(--rule); border-radius:12px; background:var(--surface); }
+.skill-group.wide { grid-column:1 / -1; }
+.skill-head { display:grid; grid-template-columns:auto 1fr auto; gap:0 10px; align-items:center; }
+.skill-head svg { width:20px; height:20px; color:var(--k, var(--accent-2)); grid-row:span 2; }
+.skill-head h3 { font-size:16px; font-weight:650; color:var(--accent); line-height:1.3; }
+.skill-head p { grid-column:2; font:12px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--muted); }
+.skill-head .count { grid-column:3; grid-row:1 / span 2; font:500 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--muted); font-variant-numeric:tabular-nums; }
+.skill-chips { display:flex; flex-wrap:wrap; gap:6px; list-style:none; }
+.skill-chips li { font-size:13.5px; line-height:1; padding:7px 10px; border-radius:999px; border:1px solid var(--rule); background:var(--bg); }
+.skill-list { list-style:none; display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:6px 24px; }
+.skill-list li { position:relative; padding-left:14px; font-size:15px; }
+.skill-list li::before { content:""; position:absolute; left:0; top:.6em; width:5px; height:5px; border-radius:50%; background:var(--accent-2); }
 .edu .org { display:block; margin-top:2px; }
 
 .notes-list { list-style:none; }
@@ -169,8 +193,8 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
   .hero-visual { width:100%; aspect-ratio:auto; height:168px; }
   .hero-visual img { width:96px; height:96px; }
   .nav { gap:14px; }
-  .skills { grid-template-columns:1fr; gap:2px; }
-  .skills dd { margin-bottom:10px; }
+  .skills { grid-template-columns:minmax(0, 1fr); }
+  .skill-list { grid-template-columns:minmax(0, 1fr); }
 }
 @media print {
   .site-header, .links, .site-footer, .skip, .field, .copy, .deck-bar, .rail { display:none; }
@@ -285,6 +309,22 @@ function renderProject(p) {
     </article>`;
 }
 
+// A skill group from resume.json, styled by its entry in site.config.json's
+// "skills": a short note, an icon, "wide" to span both columns and "list" for
+// phrases that read better as a list than as chips.
+function renderSkillGroup(group, opts) {
+  const items = group.items.join(', ').split(',').map((s) => s.trim()).filter(Boolean);
+  const icon = ICONS[opts.icon] || '';
+  const body = opts.list
+    ? `<ul class="skill-list">${items.map((i) => `<li>${esc(i[0].toUpperCase() + i.slice(1))}</li>`).join('')}</ul>`
+    : `<ul class="skill-chips">${items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`;
+  return `
+    <article class="skill-group${opts.wide ? ' wide' : ''}"${opts.icon ? ` style="--k:var(--c-${esc(opts.icon)})"` : ''}>
+      <div class="skill-head">${icon}<h3>${esc(group.category)}</h3>${opts.note ? `<p>${esc(opts.note)}</p>` : ''}<span class="count">${items.length}</span></div>
+      ${body}
+    </article>`;
+}
+
 export function renderHome({ config, resume, projects, notes }) {
   const li = linkedinOf(resume);
   const links = [
@@ -355,9 +395,9 @@ export function renderHome({ config, resume, projects, notes }) {
 
 <section id="skills" aria-labelledby="skills-h">
   <h2 id="skills-h">Skills</h2>
-  <dl class="skills">
-    ${resume.skills.map((g) => `<dt>${esc(g.category)}</dt><dd>${esc(g.items.join(', '))}</dd>`).join('\n    ')}
-  </dl>
+  <div class="skills">
+    ${resume.skills.map((g) => renderSkillGroup(g, config.skills?.[g.category] || {})).join('')}
+  </div>
 </section>
 
 <section id="education" aria-labelledby="education-h">

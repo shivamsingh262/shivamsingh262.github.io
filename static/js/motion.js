@@ -4,7 +4,7 @@
 // without JavaScript get the same content. Everything except the copy button
 // is skipped when the visitor prefers reduced motion.
 
-import { animate, stagger, onScroll, splitText, spring, utils, svg } from './anime.esm.min.js';
+import { animate, createTimeline, stagger, onScroll, splitText, spring, utils, svg } from './anime.esm.min.js';
 
 const motionOK = document.documentElement.classList.contains('motion');
 const belowFold = (el) => el.getBoundingClientRect().top > innerHeight;
@@ -113,6 +113,15 @@ function initSummary(summary) {
   });
 }
 
+// Skills: cards rise in turn as the section scrolls into view, then their
+// chips pop in.
+function initSkills(skills) {
+  if (!belowFold(skills)) return;
+  createTimeline({ autoplay: onScroll({ target: skills, enter: 'bottom-=80 top' }) })
+    .add(skills.querySelectorAll('.skill-group'), { y: [24, 0], opacity: [0, 1], duration: 600, ease: 'outQuart' }, stagger(70))
+    .add(skills.querySelectorAll('.skill-chips li, .skill-list li'), { scale: [0.6, 1], opacity: [0, 1], duration: 400, ease: 'outBack(1.8)' }, stagger(12, { start: 200 }));
+}
+
 // Projects: on phones the card grid becomes a swipeable deck, with buttons
 // for keyboard and mouse. On wider screens it stays a grid.
 const STEP = 8;
@@ -212,6 +221,7 @@ function initDeck(list) {
   }, true);
 
   function enable() {
+    if (bar) return;
     bar = document.createElement('div');
     bar.className = 'deck-bar';
     bar.innerHTML = '<span aria-live="polite"></span><span class="deck-buttons"><button type="button" class="button" data-dir="-1">Previous</button><button type="button" class="button" data-dir="1">Next project</button></span>';
@@ -235,6 +245,7 @@ function initDeck(list) {
   }
 
   function disable() {
+    if (!bar) return;
     utils.remove(cards);
     for (const card of cards) {
       card.inert = false;
@@ -246,6 +257,7 @@ function initDeck(list) {
     list.style.removeProperty('--card-h');
     list.style.removeProperty('--deck-h');
     bar.remove();
+    bar = null;
     resize.disconnect();
     busy = false;
   }
@@ -308,6 +320,8 @@ if (motionOK) {
   document.querySelectorAll('.timeline').forEach(initTimeline);
   const summary = document.querySelector('.summary');
   if (summary) initSummary(summary);
+  const skills = document.querySelector('.skills');
+  if (skills) initSkills(skills);
   const projects = document.querySelector('.projects');
   if (projects) initDeck(projects);
 }
