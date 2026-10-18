@@ -1,8 +1,9 @@
 // Motion for the home and 404 pages, built on anime.js. Loaded after the page
 // has finished loading, so it never competes with first paint. The HTML is complete
 // without this file: it only adds animation on top, so crawlers and visitors
-// without JavaScript get the same content. Everything except the copy button
-// is skipped when the visitor prefers reduced motion.
+// without JavaScript get the same content. Everything except the copy button,
+// the time in role and the header's local time is skipped when the visitor
+// prefers reduced motion.
 
 import { animate, createTimeline, stagger, onScroll, splitText, spring, utils, svg } from './anime.esm.min.js';
 
@@ -10,23 +11,44 @@ const motionOK = document.documentElement.classList.contains('motion');
 const belowFold = (el) => el.getBoundingClientRect().top > innerHeight;
 
 // Dot field: a grid of dots that ripples out from the photo on load, from
-// wherever the visitor taps, and now and then on its own while idle.
+// wherever the visitor taps, and now and then on its own while idle. In the
+// hero, dots near the pointer (or a dragged finger) also swell like a lens.
 const SPACING = 20;
+const LENS = 90;
+const DIM = 0.3;
 
 function initField(field) {
   const grid = document.createElement('div');
   grid.className = 'field-grid';
   field.append(grid);
+  // In the hero the field sits behind the text, so listen on the whole hero.
+  const host = field.closest('.hero') || field;
+  const photo = host.querySelector('img');
   let dots = [];
   let cols = 0;
   let rows = 0;
   let lastTap = 0;
+  let lastLens = 0;
+  let rippling = 0;
   let visible = true;
 
-  const color = (name) => getComputedStyle(field).getPropertyValue(name).trim();
   const odd = (n) => Math.max(1, n % 2 ? n : n - 1);
-  const push = (d) => Math.max(-3, Math.min(3, d * 0.8));
-  const center = () => Math.floor(rows / 2) * cols + Math.floor(cols / 2);
+  // Top-left corner of the centered grid, relative to the field.
+  const offset = () => {
+    const r = field.getBoundingClientRect();
+    return { r, ox: (r.width - cols * SPACING) / 2, oy: (r.height - rows * SPACING) / 2 };
+  };
+  const indexAt = (clientX, clientY) => {
+    const { r, ox, oy } = offset();
+    const x = Math.floor((clientX - r.left - ox) / SPACING);
+    const y = Math.floor((clientY - r.top - oy) / SPACING);
+    return utils.clamp(y, 0, rows - 1) * cols + utils.clamp(x, 0, cols - 1);
+  };
+  const origin = () => {
+    if (!photo) return Math.floor(rows / 2) * cols + Math.floor(cols / 2);
+    const p = photo.getBoundingClientRect();
+    return indexAt(p.left + p.width / 2, p.top + p.height / 2);
+  };
 
   function build() {
     const { width, height } = field.getBoundingClientRect();
@@ -42,38 +64,138 @@ function initField(field) {
     return true;
   }
 
+  // Dots are drawn in the bright color at 30% opacity (which matches --dot in
+  // both themes), so the flash is an opacity tween. Tweening backgroundColor on
+  // hundreds of dots made starting a ripple a long task on phones.
   function ripple(from) {
-    const fx = from % cols;
-    const fy = Math.floor(from / cols);
-    const settle = { duration: 800, ease: 'outElastic(1, .6)' };
+    rippling++;
     animate(dots, {
-      scale: [{ to: 2.2, duration: 260, ease: 'outQuad' }, { to: 1, ...settle }],
-      x: [{ to: (_, i) => push((i % cols) - fx), duration: 260 }, { to: 0, ...settle }],
-      y: [{ to: (_, i) => push(Math.floor(i / cols) - fy), duration: 260 }, { to: 0, ...settle }],
-      backgroundColor: [{ to: color('--dot-hot'), duration: 200 }, { to: color('--dot'), duration: 900 }],
+      scale: [{ to: 2.2, duration: 260, ease: 'outQuad' }, { to: 1, duration: 800, ease: 'outElastic(1, .6)' }],
+      opacity: [{ to: 1, duration: 200 }, { to: DIM, duration: 900 }],
       delay: stagger(40, { grid: [cols, rows], from }),
-      // Hand the color back to CSS so a theme switch still applies.
-      onComplete: () => dots.forEach((d) => d.style.removeProperty('background-color')),
+      onComplete: () => rippling--,
     });
   }
 
+  // Lens: scale dots by distance from the pointer. Skipped while a ripple is
+  // running so the two never fight over the same dots.
+  let px = null;
+  let py = null;
+  let frame = 0;
+  function lens() {
+    frame = 0;
+    if (rippling) return;
+    const { r, ox, oy } = offset();
+    for (let i = 0; i < dots.length; i++) {
+      const k = px === null ? 0 : Math.max(0, 1 - Math.hypot(ox + (i % cols + 0.5) * SPACING - (px - r.left), oy + (Math.floor(i / cols) + 0.5) * SPACING - (py - r.top)) / LENS);
+      utils.set(dots[i], { scale: 1 + k * 1.8, opacity: DIM + (1 - DIM) * Math.min(1, k * 2.5) });
+    }
+  }
+  const queueLens = () => { if (!frame) frame = requestAnimationFrame(lens); };
+
   build();
   utils.set(dots, { scale: 0 });
-  ripple(center());
+  // Start on the next frame so building the grid and starting the ripple
+  // don't land in one long task.
+  requestAnimationFrame(() => ripple(origin()));
 
-  field.addEventListener('pointerdown', (e) => {
-    const r = field.getBoundingClientRect();
-    const x = Math.floor((e.clientX - r.left - (r.width - cols * SPACING) / 2) / SPACING);
-    const y = Math.floor((e.clientY - r.top - (r.height - rows * SPACING) / 2) / SPACING);
+  host.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('a, button, .hero-card')) return;
     lastTap = Date.now();
-    ripple(utils.clamp(y, 0, rows - 1) * cols + utils.clamp(x, 0, cols - 1));
+    ripple(indexAt(e.clientX, e.clientY));
   });
+  if (host !== field) {
+    host.addEventListener('pointermove', (e) => {
+      px = e.clientX;
+      py = e.clientY;
+      lastLens = Date.now();
+      queueLens();
+    });
+    const clear = () => { px = py = null; queueLens(); };
+    host.addEventListener('pointerleave', clear);
+    host.addEventListener('pointercancel', clear);
+    addEventListener('scroll', () => { if (px !== null) clear(); }, { passive: true });
+  }
 
   new ResizeObserver(() => build()).observe(field);
   new IntersectionObserver(([entry]) => (visible = entry.isIntersecting)).observe(field);
   setInterval(() => {
-    if (visible && !document.hidden && Date.now() - lastTap > 12000) ripple(utils.random(0, cols * rows - 1));
+    const idle = Date.now() - Math.max(lastTap, lastLens) > 12000;
+    if (visible && idle && !rippling && !document.hidden) ripple(utils.random(0, cols * rows - 1));
   }, 4500);
+}
+
+// Hero card and text: the status dot pings, the facts count up, the tagline's
+// highlighter sweeps in, and on pointer devices the card tilts and the buttons
+// lean toward the pointer.
+function initHero(hero) {
+  animate(hero.querySelectorAll('.ping i'), { scale: [1, 2.6], opacity: [0.6, 0], duration: 1600, ease: 'outQuad', loop: true });
+
+  hero.querySelectorAll('.facts b').forEach((b, i) => {
+    const [, n, rest] = /^(\d+)(.*)$/.exec(b.textContent) || [];
+    utils.set(b, { opacity: 1 });
+    if (!n) return;
+    const count = { v: 0 };
+    animate(count, { v: Number(n), duration: 1000, delay: 200 + i * 120, ease: 'outExpo', modifier: Math.round, onUpdate: () => { b.textContent = count.v + rest; } });
+  });
+
+  const marks = [...hero.querySelectorAll('.hl')].map((hl) => hl.appendChild(document.createElement('i')));
+  animate(marks, { scaleX: [0, 1], duration: 600, ease: 'inOutQuart', delay: stagger(380, { start: 500 }) });
+
+  if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  const card = hero.querySelector('.hero-card');
+  if (card) {
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      animate(card, { rotateY: ((e.clientX - r.left) / r.width - 0.5) * 8, rotateX: -((e.clientY - r.top) / r.height - 0.5) * 8, duration: 300, ease: 'outQuad' });
+    });
+    card.addEventListener('pointerleave', () => animate(card, { rotateX: 0, rotateY: 0, ease: spring({ stiffness: 180, damping: 14 }) }));
+  }
+  for (const b of hero.querySelectorAll('.links .button')) {
+    b.addEventListener('pointermove', (e) => {
+      const r = b.getBoundingClientRect();
+      animate(b, { x: (e.clientX - r.left - r.width / 2) * 0.25, y: (e.clientY - r.top - r.height / 2) * 0.35, duration: 250, ease: 'outQuad' });
+    });
+    b.addEventListener('pointerleave', () => animate(b, { x: 0, y: 0, ease: spring({ stiffness: 260, damping: 12 }) }));
+  }
+}
+
+// Header on the home page: local time where Shivam is, then the name once the
+// hero name has scrolled under the header. Runs with reduced motion too, but
+// then the swap is instant instead of following the scroll.
+function initBrand(brand) {
+  const alt = brand.querySelector('.brand-alt');
+  const name = brand.querySelector('.brand-name');
+  const h1 = document.querySelector('.hero h1');
+  const time = new Intl.DateTimeFormat('en-US', { timeZone: alt.dataset.tz, hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+  const tick = () => {
+    const parts = time.formatToParts(new Date());
+    const zone = parts.find((p) => p.type === 'timeZoneName')?.value || '';
+    const clock = parts.filter((p) => p.type !== 'timeZoneName').map((p) => p.value).join('').trim().toLowerCase();
+    alt.innerHTML = `<span><span class="brand-city">${alt.dataset.city} · </span><b>${clock}</b> ${zone === 'GMT+5:30' ? 'IST' : zone}</span>`;
+  };
+  tick();
+  setInterval(tick, 30000);
+
+  if (!h1) return;
+  const header = brand.closest('.site-header');
+  const swap = () => {
+    const h = h1.getBoundingClientRect();
+    const passed = header.getBoundingClientRect().bottom - (h.top + h.height * 0.6);
+    const k = motionOK ? utils.clamp(passed / 50, 0, 1) : passed > 0 ? 1 : 0;
+    utils.set(name, { opacity: k, y: (1 - k) * 8 });
+    utils.set(alt, { opacity: 1 - k, y: -k * 8 });
+    name.style.pointerEvents = k > 0.5 ? 'auto' : 'none';
+  };
+  addEventListener('scroll', swap, { passive: true });
+  addEventListener('resize', swap);
+  swap();
+}
+
+// About rows slide in one after another as they scroll into view.
+function initAboutRows(rows) {
+  if (!belowFold(rows)) return;
+  animate(rows.children, { x: [-12, 0], opacity: [0, 1], duration: 600, ease: 'outQuart', delay: stagger(120), autoplay: onScroll({ target: rows, enter: 'bottom-=60 top' }) });
 }
 
 // Experience timeline: the rail fills in step with scrolling and each job's
@@ -341,17 +463,30 @@ function initCopy(pre) {
   });
 }
 
-document.querySelectorAll('.card pre').forEach(initCopy);
-document.querySelectorAll('.tenure[data-start]').forEach(updateTenure);
-
+// Each setup runs as its own task, in order of what's on screen first, so the
+// page never stalls in one long task. The header clock goes last: creating a
+// time-zone formatter is slow, and the location shows until it's ready.
+const each = (selector, init) => () => document.querySelectorAll(selector).forEach(init);
+// The copy buttons and the phone deck both change the project cards' layout,
+// so they share a task: one layout change instead of two.
+const projectCards = () => {
+  each('.card pre', initCopy)();
+  if (motionOK) each('.projects', initDeck)();
+};
+const tasks = [projectCards, each('.tenure[data-start]', updateTenure)];
 if (motionOK) {
-  document.querySelectorAll('.field').forEach(initField);
-  document.querySelectorAll('.timeline').forEach(initTimeline);
-  document.querySelectorAll('.timeline').forEach(initJobs);
-  const summary = document.querySelector('.summary');
-  if (summary) initSummary(summary);
-  const skills = document.querySelector('.skills');
-  if (skills) initSkills(skills);
-  const projects = document.querySelector('.projects');
-  if (projects) initDeck(projects);
+  tasks.push(
+    each('.field', initField),
+    each('.hero', initHero),
+    each('.about-rows', initAboutRows),
+    each('.timeline', initTimeline),
+    each('.timeline', initJobs),
+    each('.summary', initSummary),
+    each('.skills', initSkills),
+  );
 }
+tasks.push(each('.brand.swap', initBrand));
+(function run() {
+  tasks.shift()();
+  if (tasks.length) setTimeout(run);
+})();

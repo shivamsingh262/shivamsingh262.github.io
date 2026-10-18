@@ -4,6 +4,15 @@
   "tagline": "I build agentic AI platforms, data pipelines and small developer tools.",
   "description": "Shivam Singh is Director of AI Initiatives at Lyxel&Flamingo in Gurugram, India, building agentic AI platforms, LLM workflows and data infrastructure for digital marketing analytics.",
   "goatcounter": "shivamsingh262",
+  "timezone": "Asia/Kolkata",
+  "highlights": ["agentic AI platforms", "data pipelines", "small developer tools"],
+  "status": "building an agentic AI platform at Lyxel&Flamingo",
+  "facts": [
+    { "n": "12+", "label": "years" },
+    { "n": "10–20", "label": "engineers led" },
+    { "projects": true, "label": "open source" }
+  ],
+  "about": { "rows": [["Now", 1], ["Background", 3], ["Beyond engineering", 2]] },
   "skills": {
     "AI & LLM": { "note": "agents on top", "icon": "ai", "wide": true },
     "Languages & Frontend": { "note": "across every layer", "icon": "code" },

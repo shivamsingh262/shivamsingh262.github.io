@@ -47,11 +47,11 @@ const CSS = `
 :root {
   color-scheme: light dark;
   --bg:#ffffff; --surface:#f5f7fb; --fg:#1f2430; --soft:#3c4354; --muted:#596175; --accent:#1a2b4c; --accent-2:#3a5694;
-  --rule:#e2e6ee; --chip:#e9eef7; --focus:#3a5694; --dot:#c6cfdd; --dot-hot:#3a5694;
+  --rule:#e2e6ee; --chip:#e9eef7; --focus:#3a5694; --dot:#c6cfdd; --dot-hot:#3a5694; --hl:rgba(58,86,148,.16); --live:#1f8a5b;
   --c-ai:#3a5694; --c-code:#7a4fb0; --c-database:#1f7a6d; --c-cloud:#b06a1f; --c-chart:#b0436a; --c-people:#3a5694;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg:#0e131d; --surface:#151c2a; --fg:#e4e8f0; --soft:#c3cad8; --muted:#9ba4b6; --accent:#d3def5; --accent-2:#94acdf; --rule:#253044; --chip:#1d2638; --focus:#94acdf; --dot:#33405c; --dot-hot:#94acdf;
+  :root { --bg:#0e131d; --surface:#151c2a; --fg:#e4e8f0; --soft:#c3cad8; --muted:#9ba4b6; --accent:#d3def5; --accent-2:#94acdf; --rule:#253044; --chip:#1d2638; --focus:#94acdf; --dot:#33405c; --dot-hot:#94acdf; --hl:rgba(148,172,223,.2); --live:#5fd39a;
     --c-ai:#94acdf; --c-code:#b9a0e6; --c-database:#7fcbbd; --c-cloud:#e3ad6e; --c-chart:#e594b2; --c-people:#94acdf; }
 }
 * { box-sizing:border-box; margin:0; padding:0; }
@@ -68,20 +68,51 @@ a:focus-visible, .button:focus-visible, .copy:focus-visible { outline:2px solid 
 .site-header { position:sticky; top:0; z-index:5; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--rule); }
 .site-header .wrap { display:flex; align-items:center; justify-content:space-between; gap:16px; height:56px; }
 .brand { font:700 17px 'Source Serif 4', Georgia, serif; color:var(--fg); text-decoration:none; white-space:nowrap; }
+/* Home page: the header shows the local time until the hero name scrolls away,
+   then static/js/motion.js swaps in the name. Without JS it shows the location. */
+.brand.swap { display:grid; align-items:center; }
+.brand.swap > * { grid-area:1 / 1; }
+.brand-name { color:inherit; text-decoration:none; }
+.swap .brand-name { opacity:0; transform:translateY(8px); pointer-events:none; }
+.swap .brand-name:focus-visible { opacity:1 !important; transform:none !important; }
+.brand-alt { display:inline-flex; align-items:center; gap:8px; font:400 13px/1 Inter, system-ui, sans-serif; color:var(--muted); font-variant-numeric:tabular-nums; }
+.brand-alt::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--accent-2); }
+.brand-alt b { font-weight:600; color:var(--soft); }
 .site-header nav { min-width:0; }
 .nav { display:flex; gap:18px; list-style:none; font-size:14px; overflow-x:auto; scrollbar-width:none; }
 .nav::-webkit-scrollbar { display:none; }
 .nav a { color:var(--muted); text-decoration:none; white-space:nowrap; }
 .nav a:hover { color:var(--fg); }
 
-.hero { display:grid; grid-template-columns:232px 1fr; gap:36px; align-items:center; padding:48px 0 40px; }
-.hero-visual { position:relative; width:232px; aspect-ratio:1; display:grid; place-items:center; }
-.hero-visual img { position:relative; z-index:1; width:112px; height:112px; border-radius:50%; object-fit:cover; background:var(--surface); box-shadow:0 0 0 8px var(--bg); }
-.hero h1 { font:700 clamp(32px, 6vw, 44px)/1.1 'Source Serif 4', Georgia, serif; color:var(--accent); letter-spacing:-0.01em; }
-.hero .role { font-size:18px; font-weight:500; color:var(--muted); margin-top:6px; }
-.hero .tagline { margin-top:10px; font-size:17px; }
+/* Hero: the dot field spans the whole hero and fades out behind the text; the
+   status card floats on it, slightly see-through so ripples show behind it. */
+.hero { position:relative; display:grid; grid-template-columns:240px minmax(0, 1fr); gap:28px; align-items:center; padding:44px 0 40px; }
+/* The field only covers the area around the card, where the mask lets dots
+   show, which keeps the dot count (and the work to animate it) down. */
+.hero-stage { position:relative; perspective:900px; }
+.hero-stage > .field { inset:-44px -260px -40px -20px; cursor:auto; -webkit-mask-image:radial-gradient(ellipse 60% 95% at 30% 50%, #000 35%, transparent 82%); mask-image:radial-gradient(ellipse 60% 95% at 30% 50%, #000 35%, transparent 82%); }
+.hero-card { position:relative; display:grid; justify-items:center; gap:14px; padding:22px 14px 16px; border:1px solid var(--rule); border-radius:18px; background:color-mix(in srgb, var(--surface) 86%, transparent); }
+.hero-card img { width:116px; height:116px; border-radius:50%; object-fit:cover; background:var(--surface); box-shadow:0 0 0 6px var(--bg); }
+.status { display:flex; align-items:center; gap:8px; padding:7px 12px; border-radius:999px; background:var(--bg); border:1px solid var(--rule); font-size:12.5px; line-height:1.3; color:var(--soft); }
+.ping { position:relative; width:8px; height:8px; flex-shrink:0; }
+.ping::before, .ping i { content:""; position:absolute; inset:0; border-radius:50%; background:var(--live); }
+.facts { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); width:100%; padding-top:12px; border-top:1px solid var(--rule); text-align:center; }
+.facts div { display:grid; gap:2px; }
+.facts div + div { border-left:1px solid var(--rule); }
+.facts b { font-size:19px; font-weight:700; line-height:1.1; color:var(--accent); font-variant-numeric:tabular-nums; }
+.facts span { font-size:11.5px; line-height:1.25; color:var(--muted); }
+.motion .facts b { opacity:0; }
+.hero-text { position:relative; }
+.hero h1 { font:700 clamp(34px, 6vw, 50px)/1.05 'Source Serif 4', Georgia, serif; color:var(--accent); letter-spacing:-0.015em; }
+.hero .role { font-size:18px; font-weight:500; color:var(--muted); margin-top:8px; }
+.hero .tagline { position:relative; z-index:0; margin-top:10px; font-size:17px; max-width:46ch; }
+/* Highlighter under the tagline's key phrases. A plain gradient without JS;
+   with motion, static/js/motion.js draws it in as a sweep. */
+.hl { white-space:nowrap; background:linear-gradient(var(--hl), var(--hl)) 0 88% / 100% .42em no-repeat; }
+.motion .hl { position:relative; background:none; }
+.hl i { position:absolute; left:-2px; right:-2px; bottom:.06em; height:.42em; border-radius:3px; background:var(--hl); transform-origin:left center; z-index:-1; }
 .links { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
-.button { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:8px; border:1px solid var(--rule); background:var(--surface); color:var(--fg); text-decoration:none; font-size:14px; font-weight:500; }
+.button { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:999px; border:1px solid var(--rule); background:var(--surface); color:var(--fg); text-decoration:none; font-size:14px; font-weight:500; }
 .button:hover { border-color:var(--accent-2); }
 .button.primary { background:var(--accent); border-color:var(--accent); color:var(--bg); }
 .button svg { width:16px; height:16px; flex-shrink:0; }
@@ -92,19 +123,35 @@ button.button { font-family:inherit; cursor:pointer; }
 .field { position:absolute; inset:0; background:radial-gradient(circle, var(--dot) 1.6px, transparent 2.2px) center / 20px 20px; -webkit-mask-image:radial-gradient(closest-side, #000 55%, transparent); mask-image:radial-gradient(closest-side, #000 55%, transparent); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
 .motion .field { background:none; }
 .field-grid { position:absolute; inset:0; display:grid; place-content:center; grid-template-columns:repeat(var(--cols), 20px); grid-auto-rows:20px; pointer-events:none; }
-.field-grid i { width:4px; height:4px; border-radius:50%; background:var(--dot); place-self:center; }
+/* Live dots use the bright color at 30% opacity, which matches --dot, so a
+   ripple only has to tween opacity. */
+.field-grid i { width:4px; height:4px; border-radius:50%; background:var(--dot-hot); opacity:.3; place-self:center; }
+
 .field-404 { position:relative; height:200px; margin-bottom:8px; }
 @media (prefers-reduced-motion: no-preference) {
-  .hero-text > * { animation:rise .8s cubic-bezier(.2,.8,.2,1) both; }
+  .hero-text > :not(.links) { animation:rise .8s cubic-bezier(.2,.8,.2,1) both; }
   .hero-text > :nth-child(2) { animation-delay:.05s; }
   .hero-text > :nth-child(3) { animation-delay:.1s; }
-  .hero-text > :nth-child(4) { animation-delay:.15s; }
+  /* Buttons spring up in turn: an overshooting curve, no JS needed. */
+  .links .button { animation:pop .7s cubic-bezier(.34,1.56,.64,1) both; }
+  .links .button:nth-child(1) { animation-delay:.15s; }
+  .links .button:nth-child(2) { animation-delay:.21s; }
+  .links .button:nth-child(3) { animation-delay:.27s; }
+  .links .button:nth-child(4) { animation-delay:.33s; }
 }
 @keyframes rise { from { transform:translateY(14px); } }
+@keyframes pop { from { transform:translateY(10px); } }
 
 section { padding:28px 0; border-top:1px solid var(--rule); }
 h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin-bottom:18px; }
 .summary { font-size:17px; max-width:68ch; }
+/* About: the summary's first sentence as a lead, the rest as labelled rows. */
+.about-grid { display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.25fr); gap:16px 32px; align-items:start; }
+.about-grid .summary { font:600 clamp(19px, 2.6vw, 23px)/1.4 'Source Serif 4', Georgia, serif; color:var(--accent); }
+.about-rows { display:grid; gap:12px; }
+.about-rows div { display:grid; grid-template-columns:96px minmax(0, 1fr); gap:4px 14px; }
+.about-rows dt { padding-top:2px; font-size:11.5px; font-weight:600; line-height:1.6; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.about-rows dd { font-size:15.5px; color:var(--soft); }
 
 .timeline { position:relative; padding-left:28px; }
 .rail { position:absolute; left:5px; top:10px; bottom:10px; width:2px; border-radius:2px; background:var(--rule); }
@@ -203,9 +250,11 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
 .site-footer a { color:var(--muted); }
 
 @media (max-width: 600px) {
-  .hero { grid-template-columns:1fr; gap:16px; padding-top:20px; }
-  .hero-visual { width:100%; aspect-ratio:auto; height:168px; }
-  .hero-visual img { width:96px; height:96px; }
+  .hero { grid-template-columns:minmax(0, 1fr); gap:24px; padding-top:24px; }
+  .hero-stage { order:2; margin-inline:12px; }
+  .hero-stage > .field { inset:-28px -32px; -webkit-mask-image:radial-gradient(ellipse 75% 70% at 50% 50%, #000 40%, transparent 85%); mask-image:radial-gradient(ellipse 75% 70% at 50% 50%, #000 40%, transparent 85%); }
+  .about-grid { grid-template-columns:minmax(0, 1fr); }
+  .about-rows div { grid-template-columns:minmax(0, 1fr); }
   .nav { gap:14px; }
   .skills { grid-template-columns:minmax(0, 1fr); }
   .skill-list { grid-template-columns:minmax(0, 1fr); }
@@ -213,9 +262,12 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
   .job-meta { flex-direction:column; align-items:flex-start; }
   .job-meta .sep { display:none; }
 }
+@media (max-width: 420px) {
+  .brand-city { display:none; }
+}
 @media print {
-  .site-header, .links, .site-footer, .skip, .field, .copy, .deck-bar, .rail { display:none; }
-  .hero-visual { width:auto; height:auto; }
+  .site-header, .links, .site-footer, .skip, .field, .copy, .deck-bar, .rail, .ping { display:none; }
+  .motion .facts b { opacity:1; }
   section { break-inside:auto; }
   .card, .job-head, .group { break-inside:avoid; }
 }
@@ -290,7 +342,9 @@ ${config.goatcounter ? `<script data-goatcounter="https://${esc(config.goatcount
 <a class="skip" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="wrap">
-    <a class="brand" href="/">${esc(resume.name)}</a>
+    ${page.home && config.timezone
+      ? `<div class="brand swap"><span class="brand-alt" data-tz="${esc(config.timezone)}" data-city="${esc(resume.location.split(',')[0])}">${esc(resume.location)}</span><a class="brand-name" href="/">${esc(resume.name)}</a></div>`
+      : `<a class="brand" href="/">${esc(resume.name)}</a>`}
     <nav aria-label="Main"><ul class="nav">${nav.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join('')}</ul></nav>
   </div>
 </header>
@@ -403,6 +457,21 @@ function renderJob(job, opts) {
     </article>`;
 }
 
+// About: the summary's first sentence as a lead, then the other sentences as
+// labelled rows (site.config.json "about.rows": [label, sentence index]). Falls
+// back to one paragraph unless every sentence is used exactly once, so no text
+// is ever dropped.
+function renderAbout(summary, opts) {
+  const sentences = summary.split(/(?<=\.)\s+(?=[A-Z0-9])/);
+  const rows = opts?.rows || [];
+  const used = [0, ...rows.map(([, i]) => i)].sort((a, b) => a - b);
+  if (!rows.length || used.join() !== sentences.map((_, i) => i).join()) return `<p class="summary">${esc(summary)}</p>`;
+  return `<div class="about-grid">
+    <p class="summary">${esc(sentences[0])}</p>
+    <dl class="about-rows">${rows.map(([label, i]) => `<div><dt>${esc(label)}</dt><dd>${esc(sentences[i])}</dd></div>`).join('')}</dl>
+  </div>`;
+}
+
 export function renderHome({ config, resume, projects, notes }) {
   const li = linkedinOf(resume);
   const links = [
@@ -411,6 +480,15 @@ export function renderHome({ config, resume, projects, notes }) {
     li ? `<a class="button" href="${esc(li.url)}" rel="me">${ICONS.linkedin}LinkedIn</a>` : '',
     resume.email ? `<a class="button" href="mailto:${esc(resume.email)}">${ICONS.email}Email</a>` : '',
   ].filter(Boolean);
+
+  // Facts repeat numbers from the summary, so screen readers skip them.
+  const facts = config.facts?.length
+    ? `<div class="facts" aria-hidden="true">${config.facts
+        .map((f) => `<div><b>${esc(f.projects ? String(projects.length) : f.n)}</b><span>${esc(f.label)}</span></div>`)
+        .join('')}</div>`
+    : '';
+  const tagline = (config.highlights || []).reduce((t, h) => t.replace(esc(h), `<span class="hl">${esc(h)}</span>`), esc(config.tagline));
+  const about = renderAbout(resume.summary, config.about);
 
   const experience = resume.experience.map((job) => renderJob(job, config.experience?.[job.title] || {})).join('');
 
@@ -426,21 +504,25 @@ export function renderHome({ config, resume, projects, notes }) {
 
   return `
 <div class="hero">
-  <div class="hero-visual">
+  <div class="hero-stage">
     <div class="field" aria-hidden="true"></div>
-    <img src="/${esc(resume.photo)}" alt="Portrait of ${esc(resume.name)}" width="112" height="112">
+    <div class="hero-card">
+      <img src="/${esc(resume.photo)}" alt="Portrait of ${esc(resume.name)}" width="116" height="116">
+      ${config.status ? `<p class="status"><span class="ping" aria-hidden="true"><i></i></span><span>Now: ${esc(config.status)}</span></p>` : ''}
+      ${facts}
+    </div>
   </div>
   <div class="hero-text">
     <h1>${esc(resume.name)}</h1>
     <p class="role">${esc(resume.title)}${resume.location ? ` · ${esc(resume.location)}` : ''}</p>
-    <p class="tagline">${esc(config.tagline)}</p>
+    <p class="tagline">${tagline}</p>
     <div class="links">${links.join('\n      ')}</div>
   </div>
 </div>
 
 <section id="about" aria-labelledby="about-h">
   <h2 id="about-h">About</h2>
-  <p class="summary">${esc(resume.summary)}</p>
+  ${about}
 </section>
 
 <section id="experience" aria-labelledby="experience-h">
