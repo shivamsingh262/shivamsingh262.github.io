@@ -9,6 +9,7 @@
     { "repo": "moodline" },
     { "repo": "resume-pdf-builder" },
     { "repo": "grainfall" },
+    { "repo": "3dwallrender" },
     { "repo": "homebrew-tap" }
   ]
 }

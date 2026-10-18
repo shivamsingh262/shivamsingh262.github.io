@@ -136,8 +136,10 @@ async function main() {
   await fs.rm(DIST, { recursive: true, force: true });
   await fs.cp(path.join(ROOT, 'static'), DIST, { recursive: true });
   await fs.copyFile(path.join(ROOT, 'data', resume.photo), path.join(DIST, path.basename(resume.photo)));
+  // Self-host anime.js next to static/js/motion.js, which imports it.
+  await fs.copyFile(path.join(ROOT, 'node_modules', 'animejs', 'dist', 'bundles', 'anime.esm.min.js'), path.join(DIST, 'js', 'anime.esm.min.js'));
 
-  await write('index.html', renderPage(ctx, { path: '/', body: renderHome(ctx), home: true }));
+  await write('index.html', renderPage(ctx, { path: '/', body: renderHome(ctx), home: true, motion: true }));
   await write(
     'notes/index.html',
     renderPage(ctx, {
@@ -160,7 +162,7 @@ async function main() {
       })
     );
   }
-  await write('404.html', renderPage(ctx, { path: '/404.html', title: `Not found · ${resume.name}`, body: render404(), noindex: true }));
+  await write('404.html', renderPage(ctx, { path: '/404.html', title: `Not found · ${resume.name}`, body: render404(), noindex: true, motion: true }));
   await write('feed.xml', feed(config, resume, notes));
   await write('sitemap.xml', sitemap(config, notes, today));
   await write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${config.url}/sitemap.xml\n`);

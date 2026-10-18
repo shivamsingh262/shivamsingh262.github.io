@@ -35,17 +35,17 @@ const CSS = `
 :root {
   color-scheme: light dark;
   --bg:#ffffff; --surface:#f5f7fb; --fg:#1f2430; --muted:#596175; --accent:#1a2b4c; --accent-2:#3a5694;
-  --rule:#e2e6ee; --chip:#e9eef7; --focus:#3a5694;
+  --rule:#e2e6ee; --chip:#e9eef7; --focus:#3a5694; --dot:#c6cfdd; --dot-hot:#3a5694;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --bg:#0e131d; --surface:#151c2a; --fg:#e4e8f0; --muted:#9ba4b6; --accent:#d3def5; --accent-2:#94acdf; --rule:#253044; --chip:#1d2638; --focus:#94acdf; }
+  :root { --bg:#0e131d; --surface:#151c2a; --fg:#e4e8f0; --muted:#9ba4b6; --accent:#d3def5; --accent-2:#94acdf; --rule:#253044; --chip:#1d2638; --focus:#94acdf; --dot:#33405c; --dot-hot:#94acdf; }
 }
 * { box-sizing:border-box; margin:0; padding:0; }
 html { -webkit-text-size-adjust:100%; scroll-behavior:smooth; scroll-padding-top:72px; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } }
 body { background:var(--bg); color:var(--fg); font:400 16px/1.6 Inter, system-ui, sans-serif; overflow-wrap:break-word; }
 a { color:var(--accent-2); text-underline-offset:3px; }
-a:focus-visible, .button:focus-visible { outline:2px solid var(--focus); outline-offset:3px; border-radius:4px; }
+a:focus-visible, .button:focus-visible, .copy:focus-visible { outline:2px solid var(--focus); outline-offset:3px; border-radius:4px; }
 .wrap { max-width:820px; margin:0 auto; padding:0 20px; }
 .skip { position:absolute; left:-999px; top:8px; background:var(--accent); color:var(--bg); padding:8px 12px; border-radius:6px; z-index:10; }
 .skip:focus { left:12px; }
@@ -60,8 +60,9 @@ a:focus-visible, .button:focus-visible { outline:2px solid var(--focus); outline
 .nav a { color:var(--muted); text-decoration:none; white-space:nowrap; }
 .nav a:hover { color:var(--fg); }
 
-.hero { display:grid; grid-template-columns:auto 1fr; gap:28px; align-items:center; padding:56px 0 40px; }
-.hero img { width:128px; height:128px; border-radius:50%; object-fit:cover; background:var(--surface); }
+.hero { display:grid; grid-template-columns:232px 1fr; gap:36px; align-items:center; padding:48px 0 40px; }
+.hero-visual { position:relative; width:232px; aspect-ratio:1; display:grid; place-items:center; }
+.hero-visual img { position:relative; z-index:1; width:112px; height:112px; border-radius:50%; object-fit:cover; background:var(--surface); box-shadow:0 0 0 8px var(--bg); }
 .hero h1 { font:700 clamp(32px, 6vw, 44px)/1.1 'Source Serif 4', Georgia, serif; color:var(--accent); letter-spacing:-0.01em; }
 .hero .role { font-size:18px; font-weight:500; color:var(--muted); margin-top:6px; }
 .hero .tagline { margin-top:10px; font-size:17px; }
@@ -70,11 +71,33 @@ a:focus-visible, .button:focus-visible { outline:2px solid var(--focus); outline
 .button:hover { border-color:var(--accent-2); }
 .button.primary { background:var(--accent); border-color:var(--accent); color:var(--bg); }
 .button svg { width:16px; height:16px; flex-shrink:0; }
+button.button { font-family:inherit; cursor:pointer; }
+
+/* Dot field: a static dot pattern in CSS; static/js/motion.js swaps in live dots
+   that ripple on load and on tap. Purely decorative. */
+.field { position:absolute; inset:0; background:radial-gradient(circle, var(--dot) 1.6px, transparent 2.2px) center / 20px 20px; -webkit-mask-image:radial-gradient(closest-side, #000 55%, transparent); mask-image:radial-gradient(closest-side, #000 55%, transparent); cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+.motion .field { background:none; }
+.field-grid { position:absolute; inset:0; display:grid; place-content:center; grid-template-columns:repeat(var(--cols), 20px); grid-auto-rows:20px; pointer-events:none; }
+.field-grid i { width:4px; height:4px; border-radius:50%; background:var(--dot); place-self:center; }
+.field-404 { position:relative; height:200px; margin-bottom:8px; }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-text > * { animation:rise .8s cubic-bezier(.2,.8,.2,1) both; }
+  .hero-text > :nth-child(2) { animation-delay:.05s; }
+  .hero-text > :nth-child(3) { animation-delay:.1s; }
+  .hero-text > :nth-child(4) { animation-delay:.15s; }
+}
+@keyframes rise { from { transform:translateY(14px); } }
 
 section { padding:28px 0; border-top:1px solid var(--rule); }
 h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin-bottom:18px; }
 .summary { font-size:17px; max-width:68ch; }
 
+.timeline { position:relative; padding-left:28px; }
+.rail { position:absolute; left:5px; top:10px; bottom:10px; width:2px; border-radius:2px; background:var(--rule); }
+.rail-fill { position:absolute; inset:0; border-radius:inherit; background:var(--accent-2); transform-origin:top; }
+.marker { position:absolute; left:-28px; top:8px; width:12px; height:12px; border-radius:50%; border:2px solid var(--accent-2); background:var(--accent-2); transition:background-color .3s; }
+.timeline.is-live .marker:not(.is-on) { background:var(--bg); }
+.job { position:relative; }
 .job + .job { margin-top:26px; }
 .job-head { display:flex; justify-content:space-between; align-items:baseline; gap:4px 16px; flex-wrap:wrap; }
 .job h3, .edu h3 { font-size:18px; font-weight:650; color:var(--accent); line-height:1.35; }
@@ -90,7 +113,19 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
 .card h3 a { color:var(--accent); text-decoration:none; }
 .card h3 a:hover { text-decoration:underline; }
 .card p { font-size:15px; color:var(--fg); }
-.card pre { font:13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background:var(--chip); border-radius:6px; padding:8px 10px; overflow-x:auto; }
+.card pre { position:relative; font:13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background:var(--chip); border-radius:6px; padding:8px 10px; overflow-x:auto; }
+.install { position:relative; }
+.install pre { padding-right:44px; }
+.copy { position:absolute; top:50%; right:4px; margin-top:-15px; width:30px; height:30px; display:grid; place-items:center; border:0; border-radius:6px; background:var(--chip); color:var(--muted); cursor:pointer; }
+.copy:hover { color:var(--fg); background:var(--surface); }
+.copy svg { grid-area:1 / 1; width:16px; height:16px; }
+
+/* Swipe deck for the project cards on phones, set up by static/js/motion.js. */
+.projects.is-deck { display:block; position:relative; height:var(--deck-h); }
+.is-deck .card { position:absolute; top:0; left:0; right:0; height:var(--card-h); transform-origin:50% 100%; touch-action:pan-y; user-select:none; -webkit-user-select:none; cursor:grab; box-shadow:0 14px 28px -22px rgb(20 30 60 / .55); }
+.is-deck .card.is-dragging { cursor:grabbing; }
+.deck-bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-top:14px; font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums; }
+.deck-buttons { display:flex; gap:8px; }
 .meta { display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; font-size:13px; color:var(--muted); margin-top:auto; }
 .meta span { display:inline-flex; align-items:center; gap:5px; }
 .meta svg { width:13px; height:13px; }
@@ -130,14 +165,16 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
 .site-footer a { color:var(--muted); }
 
 @media (max-width: 600px) {
-  .hero { grid-template-columns:1fr; gap:18px; padding-top:36px; }
-  .hero img { width:96px; height:96px; }
+  .hero { grid-template-columns:1fr; gap:16px; padding-top:20px; }
+  .hero-visual { width:100%; aspect-ratio:auto; height:168px; }
+  .hero-visual img { width:96px; height:96px; }
   .nav { gap:14px; }
   .skills { grid-template-columns:1fr; gap:2px; }
   .skills dd { margin-bottom:10px; }
 }
 @media print {
-  .site-header, .links, .site-footer, .skip { display:none; }
+  .site-header, .links, .site-footer, .skip, .field, .copy, .deck-bar, .rail { display:none; }
+  .hero-visual { width:auto; height:auto; }
   section { break-inside:auto; }
   .card, .job-head { break-inside:avoid; }
 }
@@ -204,6 +241,7 @@ ${page.note ? `<meta property="article:published_time" content="${page.note.date
 <link rel="alternate" type="application/rss+xml" title="${esc(`${resume.name}: Notes`)}" href="/feed.xml">
 <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>${CSS}</style>
+${page.motion ? `<script>if (matchMedia('(prefers-reduced-motion: no-preference)').matches) document.documentElement.classList.add('motion');</script>` : ''}
 ${page.home ? `<script type="application/ld+json">${jsonLd(ctx)}</script>` : ''}
 ${config.goatcounter ? `<script data-goatcounter="https://${esc(config.goatcounter)}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>` : ''}
 </head>
@@ -224,6 +262,7 @@ ${page.body}
     <span><a href="/feed.xml">RSS</a> · <a href="https://github.com/${esc(config.githubUser)}/${esc(config.githubUser)}.github.io">Site source</a> · Resume PDF built with <a href="https://github.com/${esc(config.githubUser)}/resume-pdf-builder">resume-pdf-builder</a></span>
   </div>
 </footer>
+${page.motion ? `<script>addEventListener('load', () => import('/js/motion.js'));</script>` : ''}
 </body>
 </html>
 `;
@@ -259,6 +298,7 @@ export function renderHome({ config, resume, projects, notes }) {
     .map(
       (job) => `
     <article class="job">
+      <span class="marker" aria-hidden="true"></span>
       <div class="job-head">
         <h3>${esc(job.title)}</h3>
         ${job.dates ? `<span class="dates">${esc(job.dates)}</span>` : ''}
@@ -281,8 +321,11 @@ export function renderHome({ config, resume, projects, notes }) {
 
   return `
 <div class="hero">
-  <img src="/${esc(resume.photo)}" alt="Portrait of ${esc(resume.name)}" width="128" height="128">
-  <div>
+  <div class="hero-visual">
+    <div class="field" aria-hidden="true"></div>
+    <img src="/${esc(resume.photo)}" alt="Portrait of ${esc(resume.name)}" width="112" height="112">
+  </div>
+  <div class="hero-text">
     <h1>${esc(resume.name)}</h1>
     <p class="role">${esc(resume.title)}${resume.location ? ` · ${esc(resume.location)}` : ''}</p>
     <p class="tagline">${esc(config.tagline)}</p>
@@ -297,7 +340,10 @@ export function renderHome({ config, resume, projects, notes }) {
 
 <section id="experience" aria-labelledby="experience-h">
   <h2 id="experience-h">Experience</h2>
-  ${experience}
+  <div class="timeline">
+    <span class="rail" aria-hidden="true"><span class="rail-fill"></span></span>
+    ${experience}
+  </div>
 </section>
 
 <section id="projects" aria-labelledby="projects-h">
@@ -355,6 +401,7 @@ export function renderNote({ resume }, note) {
 export function render404() {
   return `
 <div class="page">
+  <div class="field-404"><div class="field" aria-hidden="true"></div></div>
   <h1>Page not found</h1>
   <p class="lede">That page doesn't exist. <a href="/">Go to the home page</a>.</p>
 </div>`;
