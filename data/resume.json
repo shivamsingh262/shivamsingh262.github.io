@@ -1,0 +1,116 @@
+{
+  "name": "Shivam Singh",
+  "title": "Director, AI Initiatives",
+  "location": "Gurugram, India",
+  "email": "shivamsingh262@gmail.com",
+  "linkedin": {
+    "label": "linkedin.com/in/shivamsingh262",
+    "url": "https://linkedin.com/in/shivamsingh262"
+  },
+  "github": "https://github.com/shivamsingh262",
+  "photo": "photo.webp",
+  "summary": "12+ years in software engineering and technical leadership, almost all of it in digital advertising and marketing analytics. Currently lead AI R&D and platform strategy at Lyxel&Flamingo, building an agentic AI platform for campaign analysis, governance, reporting, and workflow automation. Beyond engineering, I have owned full client relationships from prototype through commercial negotiation, and managed team hiring, appraisals, budgets, and direct infrastructure costs. Background is heavy on backend architecture and data infrastructure; the last two years have shifted toward agent design, memory systems, and production LLM workflows.",
+  "skills": [
+    {
+      "category": "AI & LLM",
+      "items": [
+        "OpenAI SDK, Anthropic SDK, LangGraph",
+        "Agentic system design, RAG, MCP, Tool calling",
+        "Prompt design, Embeddings, Vector search"
+      ]
+    },
+    {
+      "category": "Languages & Frontend",
+      "items": [
+        "Python, JavaScript, HTML5/CSS3",
+        "React, VueJS, React Native"
+      ]
+    },
+    {
+      "category": "Backend & Data",
+      "items": [
+        "FastAPI, Django, Flask, Tornado, Falcon, Celery, Nginx",
+        "ClickHouse, Elasticsearch, PostgreSQL, MongoDB, Redis, SQL"
+      ]
+    },
+    {
+      "category": "Cloud & DevOps",
+      "items": [
+        "AWS, Google Cloud Platform, DigitalOcean",
+        "Docker, GitLab CI/CD"
+      ]
+    },
+    {
+      "category": "Marketing & Analytics",
+      "items": [
+        "Google Ads API, Meta Graph API",
+        "Google Analytics 4, Power BI, Google Data Studio, Kibana"
+      ]
+    },
+    {
+      "category": "Leadership",
+      "items": [
+        "Engineering leadership, product strategy, technical roadmapping",
+        "Client relationship management, commercial negotiation, account growth",
+        "Hiring, mentoring, appraisals, budget ownership",
+        "Vendor procurement, P&L familiarity, stakeholder management"
+      ]
+    }
+  ],
+  "experience": [
+    {
+      "title": "Director, AI Initiatives",
+      "company": "Lyxel&Flamingo",
+      "dates": "Jan 2025 – Present",
+      "bullets": [
+        "Set AI strategy and R&D direction for the company, introducing LLM powered agents and automated workflows across products and internal engineering.",
+        "Built an agentic AI platform for campaign analysis, governance, reporting, and workflow automation, from architecture through production.",
+        "Designed the underlying agent framework: memory, tool execution, async workflows, and integrations with outside sources like Reddit, Google Trends, and web search.",
+        "Shipped an AI-powered social listening tool that pulls Meta Graph API data and scraped content to surface performance insights and recommend posting calendars.",
+        "Scoped and leading development of an AI audit automation system, working directly with operations to map manual campaign analysis workflows and identify automation opportunities.",
+        "Work closely with product and design on wireframes and UI/UX, translating business requirements into technical scope.",
+        "Hire, mentor, and set technical direction for an engineering team of 10–20."
+      ]
+    },
+    {
+      "title": "Leader, Products Team (Head of Technology)",
+      "company": "Lyxel&Flamingo",
+      "dates": "Jan 2018 – Aug 2024",
+      "bullets": [
+        "Owned engineering for Weavr, a multi-tenant marketing analytics platform supporting large scale workflows across 100+ campaigns and 50+ data sources.",
+        "Modernised the backend, consolidating a fragmented Falcon/FastAPI microservices layer into a single FastAPI platform via a strangler-fig migration, and moved analytics workloads from Elasticsearch to ClickHouse, significantly reducing infrastructure cost and improving query performance.",
+        "Built pipelines ingesting millions of records a month from ad platforms and external sources, powering sentiment analysis on customer reviews and AI-driven audits of e-commerce listings for brand visibility.",
+        "Owned client engagements end to end for Weavr, built the initial prototype, managed client relationships, negotiated contract structure as data volumes scaled, and grew the retainer from 0 to 20k USD MRR.",
+        "Prepared quarterly estimates and managed PO cycles, including billable hours tracking via custom tooling, invoice documentation, and work proof reporting for the client.",
+        "Managed team salaries, appraisal cycles, competency frameworks, and hiring end to end for the engineering function, working closely with HR and finance.",
+        "Procured and managed vendor relationships for core infrastructure; negotiating limits, costs, and API access directly.",
+        "Ran architecture reviews, sprint planning, and mentoring for 10–20 person team throughout."
+      ]
+    },
+    {
+      "title": "Senior Developer – Full Stack",
+      "company": "Lyxel Labs Pvt Ltd",
+      "dates": "Sep 2015 – Dec 2017",
+      "bullets": [
+        "Built a KPI dashboard for digital advertising metrics.",
+        "Built a real-time bidding (RTB) system for ad auctions.",
+        "Built a complaint-tracking tool for product feedback across online channels."
+      ]
+    },
+    {
+      "title": "Assistant Systems Engineer",
+      "company": "TCS",
+      "dates": "Dec 2013 – Aug 2015",
+      "bullets": [
+        "Built and maintained client applications, mostly on .NET, and handled production incident resolution."
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "B.Tech, Computer Science & Engineering",
+      "school": "Madan Mohan Malaviya Engineering College (MMMEC), Gorakhpur",
+      "dates": "2009–2013"
+    }
+  ]
+}

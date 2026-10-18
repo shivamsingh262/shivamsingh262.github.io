@@ -1,0 +1,361 @@
+// HTML templates for the site. Every piece of data is escaped with esc()
+// except note bodies, which are rendered from the site's own Markdown files.
+
+export const esc = (s) =>
+  String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+
+const ICONS = {
+  github:
+    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>',
+  linkedin:
+    '<svg viewBox="10 10 52 52" fill="currentColor" aria-hidden="true"><path d="M62,62 L51.315625,62 L51.315625,43.8021149 C51.315625,38.8127542 49.4197917,36.0245323 45.4707031,36.0245323 C41.1746094,36.0245323 38.9300781,38.9261103 38.9300781,43.8021149 L38.9300781,62 L28.6333333,62 L28.6333333,27.3333333 L38.9300781,27.3333333 L38.9300781,32.0029283 C38.9300781,32.0029283 42.0260417,26.2742151 49.3825521,26.2742151 C56.7356771,26.2742151 62,30.7644705 62,40.051212 L62,62 Z M16.349349,22.7940133 C12.8420573,22.7940133 10,19.9296567 10,16.3970067 C10,12.8643566 12.8420573,10 16.349349,10 C19.8566406,10 22.6970052,12.8643566 22.6970052,16.3970067 C22.6970052,19.9296567 19.8566406,22.7940133 16.349349,22.7940133 Z M11.0325521,62 L21.769401,62 L21.769401,27.3333333 L11.0325521,27.3333333 L11.0325521,62 Z"/></svg>',
+  email:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 6 9 6 9-6"/></svg>',
+  download:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>',
+  star:
+    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"/></svg>',
+  rss:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>',
+};
+
+// GitHub's colors for the languages used in the featured projects.
+const LANGUAGE_COLORS = {
+  Go: '#00ADD8', JavaScript: '#f1e05a', TypeScript: '#3178c6', Python: '#3572A5', Shell: '#89e051',
+  'C++': '#f34b7d', C: '#555555', Ruby: '#701516', HTML: '#e34c26', CSS: '#563d7c',
+};
+
+const linkedinOf = (r) => (typeof r.linkedin === 'string' ? { url: r.linkedin } : r.linkedin);
+const monthYear = (iso) => new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+const longDate = (ymd) => new Date(`${ymd}T00:00:00Z`).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+const CSS = `
+@font-face { font-family:'Inter'; font-style:normal; font-weight:400 700; font-display:swap; src:url('/fonts/inter-latin.woff2') format('woff2'); }
+@font-face { font-family:'Source Serif 4'; font-style:normal; font-weight:400 700; font-display:swap; src:url('/fonts/source-serif-latin.woff2') format('woff2'); }
+:root {
+  color-scheme: light dark;
+  --bg:#ffffff; --surface:#f5f7fb; --fg:#1f2430; --muted:#596175; --accent:#1a2b4c; --accent-2:#3a5694;
+  --rule:#e2e6ee; --chip:#e9eef7; --focus:#3a5694;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0e131d; --surface:#151c2a; --fg:#e4e8f0; --muted:#9ba4b6; --accent:#d3def5; --accent-2:#94acdf; --rule:#253044; --chip:#1d2638; --focus:#94acdf; }
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+html { -webkit-text-size-adjust:100%; scroll-behavior:smooth; scroll-padding-top:72px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior:auto; } }
+body { background:var(--bg); color:var(--fg); font:400 16px/1.6 Inter, system-ui, sans-serif; overflow-wrap:break-word; }
+a { color:var(--accent-2); text-underline-offset:3px; }
+a:focus-visible, .button:focus-visible { outline:2px solid var(--focus); outline-offset:3px; border-radius:4px; }
+.wrap { max-width:820px; margin:0 auto; padding:0 20px; }
+.skip { position:absolute; left:-999px; top:8px; background:var(--accent); color:var(--bg); padding:8px 12px; border-radius:6px; z-index:10; }
+.skip:focus { left:12px; }
+.visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+
+.site-header { position:sticky; top:0; z-index:5; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--rule); }
+.site-header .wrap { display:flex; align-items:center; justify-content:space-between; gap:16px; height:56px; }
+.brand { font:700 17px 'Source Serif 4', Georgia, serif; color:var(--fg); text-decoration:none; white-space:nowrap; }
+.site-header nav { min-width:0; }
+.nav { display:flex; gap:18px; list-style:none; font-size:14px; overflow-x:auto; scrollbar-width:none; }
+.nav::-webkit-scrollbar { display:none; }
+.nav a { color:var(--muted); text-decoration:none; white-space:nowrap; }
+.nav a:hover { color:var(--fg); }
+
+.hero { display:grid; grid-template-columns:auto 1fr; gap:28px; align-items:center; padding:56px 0 40px; }
+.hero img { width:128px; height:128px; border-radius:50%; object-fit:cover; background:var(--surface); }
+.hero h1 { font:700 clamp(32px, 6vw, 44px)/1.1 'Source Serif 4', Georgia, serif; color:var(--accent); letter-spacing:-0.01em; }
+.hero .role { font-size:18px; font-weight:500; color:var(--muted); margin-top:6px; }
+.hero .tagline { margin-top:10px; font-size:17px; }
+.links { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
+.button { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:8px; border:1px solid var(--rule); background:var(--surface); color:var(--fg); text-decoration:none; font-size:14px; font-weight:500; }
+.button:hover { border-color:var(--accent-2); }
+.button.primary { background:var(--accent); border-color:var(--accent); color:var(--bg); }
+.button svg { width:16px; height:16px; flex-shrink:0; }
+
+section { padding:28px 0; border-top:1px solid var(--rule); }
+h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin-bottom:18px; }
+.summary { font-size:17px; max-width:68ch; }
+
+.job + .job { margin-top:26px; }
+.job-head { display:flex; justify-content:space-between; align-items:baseline; gap:4px 16px; flex-wrap:wrap; }
+.job h3, .edu h3 { font-size:18px; font-weight:650; color:var(--accent); line-height:1.35; }
+.org { color:var(--accent-2); font-weight:600; font-size:15px; }
+.dates { font-size:14px; color:var(--muted); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.job ul { margin-top:8px; padding-left:20px; }
+.job li { margin-top:4px; max-width:72ch; }
+.job li::marker { color:var(--muted); }
+
+.projects { display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 340px), 1fr)); gap:16px; }
+.card { display:flex; flex-direction:column; gap:10px; padding:18px; border:1px solid var(--rule); border-radius:12px; background:var(--surface); }
+.card h3 { font-size:17px; font-weight:650; }
+.card h3 a { color:var(--accent); text-decoration:none; }
+.card h3 a:hover { text-decoration:underline; }
+.card p { font-size:15px; color:var(--fg); }
+.card pre { font:13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background:var(--chip); border-radius:6px; padding:8px 10px; overflow-x:auto; }
+.meta { display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; font-size:13px; color:var(--muted); margin-top:auto; }
+.meta span { display:inline-flex; align-items:center; gap:5px; }
+.meta svg { width:13px; height:13px; }
+.dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+.topics { display:flex; flex-wrap:wrap; gap:6px; list-style:none; }
+.topics li { font-size:12px; padding:2px 8px; border-radius:999px; background:var(--chip); color:var(--accent-2); }
+.more { margin-top:16px; font-size:15px; }
+
+.skills { display:grid; grid-template-columns:minmax(150px, max-content) 1fr; gap:10px 24px; }
+.skills dt { font-weight:600; }
+.skills dd { color:var(--fg); }
+.edu .org { display:block; margin-top:2px; }
+
+.notes-list { list-style:none; }
+.notes-list li + li { margin-top:18px; }
+.notes-list a { font-size:18px; font-weight:600; color:var(--accent); text-decoration:none; }
+.notes-list a:hover { text-decoration:underline; }
+.notes-list p { color:var(--muted); font-size:15px; }
+.empty { color:var(--muted); }
+
+.page { padding:48px 0 24px; }
+.page h1 { font:700 clamp(28px, 5vw, 38px)/1.15 'Source Serif 4', Georgia, serif; color:var(--accent); }
+.page .lede { color:var(--muted); margin-top:8px; }
+.prose { margin-top:28px; font-size:17px; max-width:70ch; }
+.prose > * + * { margin-top:1em; }
+.prose h2 { font:700 24px 'Source Serif 4', Georgia, serif; letter-spacing:0; text-transform:none; color:var(--accent); margin:1.6em 0 0.4em; }
+.prose h3 { font-size:19px; margin-top:1.4em; }
+.prose ul, .prose ol { padding-left:22px; }
+.prose code { font:0.9em ui-monospace, SFMono-Regular, Menlo, monospace; background:var(--chip); padding:1px 5px; border-radius:4px; }
+.prose pre { background:var(--surface); border:1px solid var(--rule); border-radius:8px; padding:14px; overflow-x:auto; }
+.prose pre code { background:none; padding:0; }
+.prose blockquote { border-left:3px solid var(--rule); padding-left:14px; color:var(--muted); }
+.prose img { max-width:100%; height:auto; border-radius:8px; }
+
+.site-footer { border-top:1px solid var(--rule); margin-top:24px; padding:24px 0 40px; font-size:14px; color:var(--muted); }
+.site-footer .wrap { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px 20px; }
+.site-footer a { color:var(--muted); }
+
+@media (max-width: 600px) {
+  .hero { grid-template-columns:1fr; gap:18px; padding-top:36px; }
+  .hero img { width:96px; height:96px; }
+  .nav { gap:14px; }
+  .skills { grid-template-columns:1fr; gap:2px; }
+  .skills dd { margin-bottom:10px; }
+}
+@media print {
+  .site-header, .links, .site-footer, .skip { display:none; }
+  section { break-inside:auto; }
+  .card, .job-head { break-inside:avoid; }
+}
+`;
+
+function jsonLd({ config, resume }) {
+  const li = linkedinOf(resume);
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    url: `${config.url}/`,
+    mainEntity: {
+      '@type': 'Person',
+      name: resume.name,
+      jobTitle: resume.title,
+      description: config.description,
+      url: `${config.url}/`,
+      image: `${config.url}/${resume.photo}`,
+      email: resume.email ? `mailto:${resume.email}` : undefined,
+      address: resume.location ? { '@type': 'PostalAddress', addressLocality: resume.location.split(',')[0].trim(), addressCountry: 'IN' } : undefined,
+      worksFor: resume.experience[0] ? { '@type': 'Organization', name: resume.experience[0].company } : undefined,
+      alumniOf: resume.education.map((e) => ({ '@type': 'CollegeOrUniversity', name: e.school })),
+      knowsAbout: resume.skills.flatMap((g) => g.items.join(', ').split(',').map((s) => s.trim())).slice(0, 30),
+      sameAs: [`https://github.com/${config.githubUser}`, li?.url].filter(Boolean),
+    },
+  };
+  // Escape "<" so a value can never close the script element.
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
+export function renderPage(ctx, page) {
+  const { config, resume } = ctx;
+  const title = page.title || `${resume.name} · ${resume.title}`;
+  const description = page.description || config.description;
+  const url = `${config.url}${page.path}`;
+  const ogType = page.type || (page.home ? 'profile' : 'website');
+  const nav = page.home
+    ? [['#about', 'About'], ['#experience', 'Experience'], ['#projects', 'Projects'], ['#skills', 'Skills'], ['/notes/', 'Notes']]
+    : [['/#about', 'About'], ['/#experience', 'Experience'], ['/#projects', 'Projects'], ['/notes/', 'Notes']];
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(description)}">
+<meta name="author" content="${esc(resume.name)}">
+${page.noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" href="${esc(url)}">`}
+<meta property="og:type" content="${ogType}">
+<meta property="og:site_name" content="${esc(resume.name)}">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(description)}">
+<meta property="og:url" content="${esc(url)}">
+<meta property="og:image" content="${esc(config.url)}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${esc(`${resume.name}, ${resume.title}`)}">
+${ogType === 'profile' ? `<meta property="profile:first_name" content="${esc(resume.name.split(' ')[0])}">\n<meta property="profile:last_name" content="${esc(resume.name.split(' ').slice(1).join(' '))}">` : ''}
+${page.note ? `<meta property="article:published_time" content="${page.note.date}">` : ''}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e131d" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="alternate" type="application/rss+xml" title="${esc(`${resume.name}: Notes`)}" href="/feed.xml">
+<link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<style>${CSS}</style>
+${page.home ? `<script type="application/ld+json">${jsonLd(ctx)}</script>` : ''}
+${config.goatcounter ? `<script data-goatcounter="https://${esc(config.goatcounter)}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>` : ''}
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/">${esc(resume.name)}</a>
+    <nav aria-label="Main"><ul class="nav">${nav.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join('')}</ul></nav>
+  </div>
+</header>
+<main id="main" class="wrap">
+${page.body}
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© ${new Date().getFullYear()} ${esc(resume.name)}</span>
+    <span><a href="/feed.xml">RSS</a> · <a href="https://github.com/${esc(config.githubUser)}/${esc(config.githubUser)}.github.io">Site source</a> · Resume PDF built with <a href="https://github.com/${esc(config.githubUser)}/resume-pdf-builder">resume-pdf-builder</a></span>
+  </div>
+</footer>
+</body>
+</html>
+`;
+}
+
+function renderProject(p) {
+  const color = LANGUAGE_COLORS[p.language] || 'var(--muted)';
+  return `
+    <article class="card">
+      <h3><a href="${esc(p.url)}">${esc(p.name)}</a></h3>
+      <p>${esc(p.description)}</p>
+      ${p.install ? `<pre><code>${esc(p.install)}</code></pre>` : ''}
+      ${p.topics.length ? `<ul class="topics" aria-label="Topics">${p.topics.slice(0, 4).map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}
+      <div class="meta">
+        ${p.language ? `<span><i class="dot" style="background:${color}"></i>${esc(p.language)}</span>` : ''}
+        ${p.stars ? `<span>${ICONS.star}${p.stars}<span class="visually-hidden"> stars</span></span>` : ''}
+        <span>Updated ${monthYear(p.pushedAt)}</span>
+        ${p.homepage ? `<a href="${esc(p.homepage)}">Website</a>` : ''}
+      </div>
+    </article>`;
+}
+
+export function renderHome({ config, resume, projects, notes }) {
+  const li = linkedinOf(resume);
+  const links = [
+    `<a class="button primary" href="/resume.pdf" download>${ICONS.download}Download resume</a>`,
+    `<a class="button" href="https://github.com/${esc(config.githubUser)}" rel="me">${ICONS.github}GitHub</a>`,
+    li ? `<a class="button" href="${esc(li.url)}" rel="me">${ICONS.linkedin}LinkedIn</a>` : '',
+    resume.email ? `<a class="button" href="mailto:${esc(resume.email)}">${ICONS.email}Email</a>` : '',
+  ].filter(Boolean);
+
+  const experience = resume.experience
+    .map(
+      (job) => `
+    <article class="job">
+      <div class="job-head">
+        <h3>${esc(job.title)}</h3>
+        ${job.dates ? `<span class="dates">${esc(job.dates)}</span>` : ''}
+      </div>
+      <div class="org">${esc(job.company)}</div>
+      ${job.bullets.length ? `<ul>${job.bullets.map((b) => `<li>${esc(b)}</li>`).join('')}</ul>` : ''}
+    </article>`
+    )
+    .join('');
+
+  const education = resume.education
+    .map(
+      (ed) => `
+    <article class="edu">
+      <div class="job-head"><h3>${esc(ed.degree)}</h3>${ed.dates ? `<span class="dates">${esc(ed.dates)}</span>` : ''}</div>
+      <span class="org">${esc(ed.school)}</span>
+    </article>`
+    )
+    .join('');
+
+  return `
+<div class="hero">
+  <img src="/${esc(resume.photo)}" alt="Portrait of ${esc(resume.name)}" width="128" height="128">
+  <div>
+    <h1>${esc(resume.name)}</h1>
+    <p class="role">${esc(resume.title)}${resume.location ? ` · ${esc(resume.location)}` : ''}</p>
+    <p class="tagline">${esc(config.tagline)}</p>
+    <div class="links">${links.join('\n      ')}</div>
+  </div>
+</div>
+
+<section id="about" aria-labelledby="about-h">
+  <h2 id="about-h">About</h2>
+  <p class="summary">${esc(resume.summary)}</p>
+</section>
+
+<section id="experience" aria-labelledby="experience-h">
+  <h2 id="experience-h">Experience</h2>
+  ${experience}
+</section>
+
+<section id="projects" aria-labelledby="projects-h">
+  <h2 id="projects-h">Open source projects</h2>
+  <div class="projects">${projects.map(renderProject).join('')}
+  </div>
+  <p class="more"><a href="https://github.com/${esc(config.githubUser)}?tab=repositories">All repositories on GitHub →</a></p>
+</section>
+
+<section id="skills" aria-labelledby="skills-h">
+  <h2 id="skills-h">Skills</h2>
+  <dl class="skills">
+    ${resume.skills.map((g) => `<dt>${esc(g.category)}</dt><dd>${esc(g.items.join(', '))}</dd>`).join('\n    ')}
+  </dl>
+</section>
+
+<section id="education" aria-labelledby="education-h">
+  <h2 id="education-h">Education</h2>
+  ${education}
+</section>
+
+<section id="notes" aria-labelledby="notes-h">
+  <h2 id="notes-h">Notes</h2>
+  ${notesList(notes.slice(0, 3))}
+  <p class="more"><a href="/notes/">All notes</a> · <a href="/feed.xml">RSS feed</a></p>
+</section>`;
+}
+
+function notesList(notes) {
+  if (!notes.length) return '<p class="empty">Writing on AI agents, data infrastructure and developer tools is coming soon. Subscribe to the RSS feed to get the first post.</p>';
+  return `<ul class="notes-list">${notes
+    .map((n) => `<li><a href="/notes/${esc(n.slug)}/">${esc(n.title)}</a><p><time datetime="${n.date}">${longDate(n.date)}</time> · ${esc(n.description)}</p></li>`)
+    .join('')}</ul>`;
+}
+
+export function renderNotesIndex({ notes }) {
+  return `
+<div class="page">
+  <h1>Notes</h1>
+  <p class="lede">On AI agents, data infrastructure and developer tools. <a href="/feed.xml">RSS feed</a></p>
+  <div class="prose">${notesList(notes)}</div>
+</div>`;
+}
+
+export function renderNote({ resume }, note) {
+  return `
+<article class="page">
+  <h1>${esc(note.title)}</h1>
+  <p class="lede"><time datetime="${note.date}">${longDate(note.date)}</time> · ${esc(resume.name)}</p>
+  <div class="prose">${note.html}</div>
+  <p class="more"><a href="/notes/">← All notes</a></p>
+</article>`;
+}
+
+export function render404() {
+  return `
+<div class="page">
+  <h1>Page not found</h1>
+  <p class="lede">That page doesn't exist. <a href="/">Go to the home page</a>.</p>
+</div>`;
+}

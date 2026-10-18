@@ -1,0 +1,69 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  # Weekly rebuild so project stars, descriptions and topics stay current.
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Pinned because the sandbox step below is specific to Ubuntu 24.04.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/checkout@v5
+        with:
+          repository: shivamsingh262/resume-pdf-builder
+          path: .builder
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            .builder/package-lock.json
+      # Ubuntu 24.04 blocks the unprivileged user namespaces Chromium's sandbox
+      # needs; re-enable them instead of running Chromium with --no-sandbox.
+      - name: Allow Chromium sandbox
+        run: echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+      - run: npm ci
+      - run: npm ci
+        working-directory: .builder
+      - name: Build site
+        run: npm run build
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Build resume PDF
+        run: npm run pdf
+        env:
+          BUILDER: .builder
+      - name: Render social preview image
+        run: npm run og
+        env:
+          PUPPETEER_FROM: .builder
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

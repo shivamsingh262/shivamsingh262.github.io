@@ -1,0 +1,93 @@
+[
+  {
+    "name": "tailyard",
+    "url": "https://github.com/shivamsingh262/tailyard",
+    "homepage": null,
+    "description": "One terminal for your local dev stack: logs, HTTP traffic, browser console and Redis queues",
+    "language": "Go",
+    "stars": 0,
+    "topics": [
+      "cli",
+      "developer-tools",
+      "devtools",
+      "go",
+      "http",
+      "logs",
+      "redis",
+      "tui"
+    ],
+    "pushedAt": "2026-10-18T08:38:35Z"
+  },
+  {
+    "name": "moodline",
+    "url": "https://github.com/shivamsingh262/moodline",
+    "homepage": null,
+    "description": "A Claude Code status line with cost, limits, cache timer and a mood-aware avatar",
+    "language": "Shell",
+    "stars": 0,
+    "topics": [
+      "bash",
+      "claude-code",
+      "cli",
+      "statusline"
+    ],
+    "pushedAt": "2026-10-18T07:57:11Z"
+  },
+  {
+    "name": "resume-pdf-builder",
+    "url": "https://github.com/shivamsingh262/resume-pdf-builder",
+    "homepage": null,
+    "description": "Generate a polished, multi-page-safe resume PDF from a JSON file using HTML/CSS themes and headless Chromium.",
+    "language": "JavaScript",
+    "stars": 0,
+    "topics": [
+      "cv",
+      "nodejs",
+      "pdf",
+      "puppeteer",
+      "resume",
+      "resume-builder"
+    ],
+    "pushedAt": "2026-10-18T09:07:02Z"
+  },
+  {
+    "name": "grainfall",
+    "url": "https://github.com/shivamsingh262/grainfall",
+    "homepage": null,
+    "description": "A small falling-sand sandbox in C++20 with raylib: sand, water, fire, smoke and more",
+    "language": "C++",
+    "stars": 0,
+    "topics": [
+      "cellular-automata",
+      "cmake",
+      "cpp",
+      "cpp20",
+      "falling-sand",
+      "game",
+      "gamedev",
+      "particle-simulation",
+      "physics-simulation",
+      "pixel-art",
+      "powder-game",
+      "raylib",
+      "sandbox",
+      "sandbox-game",
+      "simulation"
+    ],
+    "pushedAt": "2026-10-18T08:42:19Z"
+  },
+  {
+    "name": "homebrew-tap",
+    "url": "https://github.com/shivamsingh262/homebrew-tap",
+    "homepage": null,
+    "description": "Homebrew tap for shivamsingh262's tools",
+    "language": "Ruby",
+    "stars": 0,
+    "topics": [
+      "homebrew",
+      "homebrew-cask",
+      "homebrew-tap"
+    ],
+    "pushedAt": "2026-10-18T09:14:55Z"
+  }
+]
