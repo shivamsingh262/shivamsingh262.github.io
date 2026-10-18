@@ -86,14 +86,15 @@ a:focus-visible, .button:focus-visible, .copy:focus-visible { outline:2px solid 
 
 /* Hero: the dot field spans the whole hero and fades out behind the text; the
    status card floats on it, slightly see-through so ripples show behind it. */
-.hero { position:relative; display:grid; grid-template-columns:240px minmax(0, 1fr); gap:28px; align-items:center; padding:44px 0 40px; }
-/* The field only covers the area around the card, where the mask lets dots
-   show, which keeps the dot count (and the work to animate it) down. */
+.hero { position:relative; display:grid; grid-template-columns:228px minmax(0, 1fr); gap:64px; align-items:center; padding:44px 0 40px; }
+/* The field is centered on the card and stops short of the text (its 40px
+   margin is less than the 64px gap). Keeping it small also keeps the dot
+   count, and the work to animate it, down. */
 .hero-stage { position:relative; perspective:900px; }
-.hero-stage > .field { inset:-44px -260px -40px -20px; cursor:auto; -webkit-mask-image:radial-gradient(ellipse 60% 95% at 30% 50%, #000 35%, transparent 82%); mask-image:radial-gradient(ellipse 60% 95% at 30% 50%, #000 35%, transparent 82%); }
+.hero-stage > .field { inset:-40px; cursor:auto; -webkit-mask-image:radial-gradient(closest-side, #000 75%, transparent); mask-image:radial-gradient(closest-side, #000 75%, transparent); }
 .hero-card { position:relative; display:grid; justify-items:center; gap:14px; padding:22px 14px 16px; border:1px solid var(--rule); border-radius:18px; background:color-mix(in srgb, var(--surface) 86%, transparent); }
 .hero-card img { width:116px; height:116px; border-radius:50%; object-fit:cover; background:var(--surface); box-shadow:0 0 0 6px var(--bg); }
-.status { display:flex; align-items:center; gap:8px; padding:7px 12px; border-radius:999px; background:var(--bg); border:1px solid var(--rule); font-size:12.5px; line-height:1.3; color:var(--soft); }
+.status { display:flex; align-items:center; gap:7px; padding:7px 10px; border-radius:999px; background:var(--bg); border:1px solid var(--rule); font-size:12px; line-height:1.3; color:var(--soft); }
 .ping { position:relative; width:8px; height:8px; flex-shrink:0; }
 .ping::before, .ping i { content:""; position:absolute; inset:0; border-radius:50%; background:var(--live); }
 .facts { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); width:100%; padding-top:12px; border-top:1px solid var(--rule); text-align:center; }
@@ -111,8 +112,8 @@ a:focus-visible, .button:focus-visible, .copy:focus-visible { outline:2px solid 
 .hl { white-space:nowrap; background:linear-gradient(var(--hl), var(--hl)) 0 88% / 100% .42em no-repeat; }
 .motion .hl { position:relative; background:none; }
 .hl i { position:absolute; left:-2px; right:-2px; bottom:.06em; height:.42em; border-radius:3px; background:var(--hl); transform-origin:left center; z-index:-1; }
-.links { display:flex; flex-wrap:wrap; gap:10px; margin-top:20px; }
-.button { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:999px; border:1px solid var(--rule); background:var(--surface); color:var(--fg); text-decoration:none; font-size:14px; font-weight:500; }
+.links { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+.button { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px; border:1px solid var(--rule); background:var(--surface); color:var(--fg); text-decoration:none; font-size:14px; font-weight:500; }
 .button:hover { border-color:var(--accent-2); }
 .button.primary { background:var(--accent); border-color:var(--accent); color:var(--bg); }
 .button svg { width:16px; height:16px; flex-shrink:0; }
