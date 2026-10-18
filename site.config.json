@@ -3,7 +3,7 @@
   "githubUser": "shivamsingh262",
   "tagline": "I build agentic AI platforms, data pipelines and small developer tools.",
   "description": "Shivam Singh is Director of AI Initiatives at Lyxel&Flamingo in Gurugram, India, building agentic AI platforms, LLM workflows and data infrastructure for digital marketing analytics.",
-  "goatcounter": "",
+  "goatcounter": "shivamsingh262",
   "projects": [
     { "repo": "tailyard", "install": "brew install shivamsingh262/tap/tailyard" },
     { "repo": "moodline" },
