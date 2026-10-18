@@ -5,6 +5,7 @@
 // anonymous rate limit). A successful fetch is saved to
 // data/projects.cache.json, which is used when the API is unreachable.
 
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { marked } from 'marked';
@@ -107,10 +108,21 @@ ${items}
 `;
 }
 
+// The home page's lastmod is the date of the latest commit, not the build
+// date, so the weekly rebuild doesn't claim a change that didn't happen.
+function lastCommitDate(fallback) {
+  try {
+    return execFileSync('git', ['log', '-1', '--format=%cs'], { cwd: ROOT, encoding: 'utf8' }).trim() || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function sitemap(config, notes, today) {
   const urls = [
-    { loc: `${config.url}/`, lastmod: today },
-    { loc: `${config.url}/notes/`, lastmod: notes[0]?.date || today },
+    { loc: `${config.url}/`, lastmod: lastCommitDate(today) },
+    // The notes index is left out (and noindexed) until there's a note on it.
+    ...(notes.length ? [{ loc: `${config.url}/notes/`, lastmod: notes[0].date }] : []),
     ...notes.map((n) => ({ loc: `${config.url}/notes/${n.slug}/`, lastmod: n.date })),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -147,6 +159,7 @@ async function main() {
       title: `Notes · ${resume.name}`,
       description: `Notes by ${resume.name} on AI agents, data infrastructure and developer tools.`,
       body: renderNotesIndex(ctx),
+      noindex: !notes.length,
     })
   );
   for (const note of notes) {

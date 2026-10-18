@@ -273,40 +273,81 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
 }
 `;
 
+// Structured data for the home page: the profile page, the person it's about
+// and the site, linked by @id so search engines treat them as one entity.
+// alternateName, the company URL and the city help tell this Shivam Singh
+// apart from others with the same name.
 function jsonLd({ config, resume }) {
   const li = linkedinOf(resume);
+  const person = `${config.url}/#person`;
+  const company = resume.experience[0]?.company;
   const data = {
     '@context': 'https://schema.org',
-    '@type': 'ProfilePage',
-    url: `${config.url}/`,
-    mainEntity: {
+    '@graph': [
+      {
+        '@type': 'ProfilePage',
+        '@id': `${config.url}/`,
+        url: `${config.url}/`,
+        name: `${resume.name} · ${config.title || resume.title}`,
+        isPartOf: { '@id': `${config.url}/#website` },
+        mainEntity: { '@id': person },
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${config.url}/#website`,
+        url: `${config.url}/`,
+        name: resume.name,
+        inLanguage: 'en',
+        publisher: { '@id': person },
+      },
+      {
       '@type': 'Person',
+      '@id': person,
       name: resume.name,
+      alternateName: config.githubUser,
       jobTitle: resume.title,
       description: config.description,
       url: `${config.url}/`,
       image: `${config.url}/${resume.photo}`,
       email: resume.email ? `mailto:${resume.email}` : undefined,
       address: resume.location ? { '@type': 'PostalAddress', addressLocality: resume.location.split(',')[0].trim(), addressCountry: 'IN' } : undefined,
-      worksFor: resume.experience[0] ? { '@type': 'Organization', name: resume.experience[0].company } : undefined,
+      worksFor: company ? { '@type': 'Organization', name: company, url: config.companyUrl } : undefined,
       alumniOf: resume.education.map((e) => ({ '@type': 'CollegeOrUniversity', name: e.school })),
-      knowsAbout: resume.skills.flatMap((g) => g.items.join(', ').split(',').map((s) => s.trim())).slice(0, 30),
+      knowsAbout: [...new Set(resume.skills.flatMap((g) => g.items.join(', ').split(',').map((s) => s.trim()).filter(Boolean)))],
       sameAs: [`https://github.com/${config.githubUser}`, li?.url].filter(Boolean),
-    },
+      },
+    ],
   };
   // Escape "<" so a value can never close the script element.
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
+// Structured data for a note page.
+function noteLd({ config, resume }, note, url) {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: note.title,
+    description: note.description,
+    datePublished: note.date,
+    url,
+    mainEntityOfPage: url,
+    image: `${config.url}/og.png`,
+    author: { '@type': 'Person', '@id': `${config.url}/#person`, name: resume.name, url: `${config.url}/` },
+  };
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 export function renderPage(ctx, page) {
-  const { config, resume } = ctx;
-  const title = page.title || `${resume.name} · ${resume.title}`;
+  const { config, resume, notes } = ctx;
+  const title = page.title || `${resume.name} · ${config.title || resume.title}`;
   const description = page.description || config.description;
   const url = `${config.url}${page.path}`;
   const ogType = page.type || (page.home ? 'profile' : 'website');
-  const nav = page.home
-    ? [['#about', 'About'], ['#experience', 'Experience'], ['#projects', 'Projects'], ['#skills', 'Skills'], ['/notes/', 'Notes']]
-    : [['/#about', 'About'], ['/#experience', 'Experience'], ['/#projects', 'Projects'], ['/notes/', 'Notes']];
+  const base = page.home ? '' : '/';
+  const nav = [['#about', 'About'], ['#experience', 'Experience'], ['#projects', 'Projects'], ['#skills', 'Skills']].map(([h, l]) => [base + h, l]);
+  // Notes stay out of the nav, home page, feed link and sitemap until the first one exists.
+  if (notes.length) nav.push(['/notes/', 'Notes']);
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -328,14 +369,19 @@ ${page.noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonica
 ${ogType === 'profile' ? `<meta property="profile:first_name" content="${esc(resume.name.split(' ')[0])}">\n<meta property="profile:last_name" content="${esc(resume.name.split(' ').slice(1).join(' '))}">` : ''}
 ${page.note ? `<meta property="article:published_time" content="${page.note.date}">` : ''}
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(title)}">
+<meta name="twitter:description" content="${esc(description)}">
+<meta name="twitter:image" content="${esc(config.url)}/og.png">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e131d" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="alternate" type="application/rss+xml" title="${esc(`${resume.name}: Notes`)}" href="/feed.xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+${notes.length ? `<link rel="alternate" type="application/rss+xml" title="${esc(`${resume.name}: Notes`)}" href="/feed.xml">` : ''}
 <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>${CSS}</style>
 ${page.motion ? `<script>if (matchMedia('(prefers-reduced-motion: no-preference)').matches) document.documentElement.classList.add('motion');</script>` : ''}
 ${page.home ? `<script type="application/ld+json">${jsonLd(ctx)}</script>` : ''}
+${page.note ? `<script type="application/ld+json">${noteLd(ctx, page.note, url)}</script>` : ''}
 ${config.goatcounter ? `<script data-goatcounter="https://${esc(config.goatcounter)}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>` : ''}
 </head>
 <body>
@@ -354,7 +400,7 @@ ${page.body}
 <footer class="site-footer">
   <div class="wrap">
     <span>© ${new Date().getFullYear()} ${esc(resume.name)}</span>
-    <span><a href="/feed.xml">RSS</a> · <a href="https://github.com/${esc(config.githubUser)}/${esc(config.githubUser)}.github.io">Site source</a> · Resume PDF built with <a href="https://github.com/${esc(config.githubUser)}/resume-pdf-builder">resume-pdf-builder</a></span>
+    <span>${notes.length ? '<a href="/feed.xml">RSS</a> · ' : ''}<a href="https://github.com/${esc(config.githubUser)}/${esc(config.githubUser)}.github.io">Site source</a> · Resume PDF built with <a href="https://github.com/${esc(config.githubUser)}/resume-pdf-builder">resume-pdf-builder</a></span>
   </div>
 </footer>
 ${page.motion ? `<script>addEventListener('load', () => import('/js/motion.js'));</script>` : ''}
@@ -552,11 +598,11 @@ export function renderHome({ config, resume, projects, notes }) {
   ${education}
 </section>
 
-<section id="notes" aria-labelledby="notes-h">
+${notes.length ? `<section id="notes" aria-labelledby="notes-h">
   <h2 id="notes-h">Notes</h2>
   ${notesList(notes.slice(0, 3))}
   <p class="more"><a href="/notes/">All notes</a> · <a href="/feed.xml">RSS feed</a></p>
-</section>`;
+</section>` : ''}`;
 }
 
 function notesList(notes) {

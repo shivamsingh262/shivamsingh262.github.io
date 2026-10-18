@@ -1,5 +1,6 @@
 // Renders dist/og.png, the 1200x630 preview image shown when the site is
-// shared on LinkedIn, Slack, WhatsApp and so on. Run after `npm run build`.
+// shared on LinkedIn, Slack, WhatsApp and so on, and dist/apple-touch-icon.png.
+// Run after `npm run build`.
 //
 // Puppeteer is borrowed from a resume-pdf-builder checkout instead of being a
 // dependency of this site: PUPPETEER_FROM points at it (default ../resume).
@@ -50,6 +51,13 @@ try {
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: path.join(ROOT, 'dist', 'og.png') });
   console.log('Wrote dist/og.png');
+
+  // iOS home-screen icon: the SVG favicon at 180x180 PNG.
+  const favicon = await dataUri(path.join(ROOT, 'static/favicon.svg'), 'image/svg+xml');
+  await page.setViewport({ width: 180, height: 180 });
+  await page.setContent(`<!DOCTYPE html><style>*{margin:0}img{display:block;width:180px;height:180px}</style><img src="${favicon}" alt="">`);
+  await page.screenshot({ path: path.join(ROOT, 'dist', 'apple-touch-icon.png') });
+  console.log('Wrote dist/apple-touch-icon.png');
 } finally {
   await browser.close();
 }
