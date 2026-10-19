@@ -292,6 +292,7 @@ function jsonLd({ config, resume }) {
         name: `${resume.name} · ${config.title || resume.title}`,
         isPartOf: { '@id': `${config.url}/#website` },
         mainEntity: { '@id': person },
+        primaryImageOfPage: { '@id': `${config.url}/#photo` },
       },
       {
         '@type': 'WebSite',
@@ -309,7 +310,8 @@ function jsonLd({ config, resume }) {
       jobTitle: resume.title,
       description: config.description,
       url: `${config.url}/`,
-      image: `${config.url}/${resume.photo}`,
+      // static/photo-1200.webp is the full-size export for search engines; the page shows the small one.
+      image: { '@type': 'ImageObject', '@id': `${config.url}/#photo`, url: `${config.url}/photo-1200.webp`, contentUrl: `${config.url}/photo-1200.webp`, width: 1200, height: 1200, caption: `Portrait of ${resume.name}` },
       email: resume.email ? `mailto:${resume.email}` : undefined,
       address: resume.location ? { '@type': 'PostalAddress', addressLocality: resume.location.split(',')[0].trim(), addressCountry: 'IN' } : undefined,
       worksFor: company ? { '@type': 'Organization', name: company, alternateName: config.companyAlternateName, url: config.companyUrl } : undefined,
@@ -357,7 +359,7 @@ export function renderPage(ctx, page) {
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <meta name="author" content="${esc(resume.name)}">
-${page.noindex ? '<meta name="robots" content="noindex">' : `<link rel="canonical" href="${esc(url)}">`}
+${page.noindex ? '<meta name="robots" content="noindex">' : `<meta name="robots" content="max-image-preview:large">\n<link rel="canonical" href="${esc(url)}">`}
 <meta property="og:type" content="${ogType}">
 <meta property="og:site_name" content="${esc(resume.name)}">
 <meta property="og:title" content="${esc(title)}">
@@ -554,7 +556,7 @@ export function renderHome({ config, resume, projects, notes }) {
   <div class="hero-stage">
     <div class="field" aria-hidden="true"></div>
     <div class="hero-card">
-      <img src="/${esc(resume.photo)}" alt="Portrait of ${esc(resume.name)}" width="116" height="116">
+      <img src="/${esc(resume.photo)}" srcset="/${esc(resume.photo)} 400w, /photo-1200.webp 1200w" sizes="116px" alt="Portrait of ${esc(resume.name)}" width="116" height="116">
       ${config.status ? `<p class="status"><span class="ping" aria-hidden="true"><i></i></span><span>Now: ${esc(config.status)}</span></p>` : ''}
       ${facts}
     </div>
