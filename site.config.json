@@ -62,7 +62,7 @@
     }
   },
   "projects": [
-    { "repo": "factguard", "install": "pip install git+https://github.com/shivamsingh262/factguard" },
+    { "repo": "factguard", "install": "pip install factguard" },
     { "repo": "tailyard", "install": "brew install shivamsingh262/tap/tailyard" },
     { "repo": "moodline" },
     { "repo": "resume-pdf-builder" },
