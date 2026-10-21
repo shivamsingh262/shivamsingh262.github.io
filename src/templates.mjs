@@ -245,6 +245,7 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
 .prose pre code { background:none; padding:0; }
 .prose blockquote { border-left:3px solid var(--rule); padding-left:14px; color:var(--muted); }
 .prose img { max-width:100%; height:auto; border-radius:8px; }
+.prose iframe { display:block; width:100%; aspect-ratio:16 / 9; border:1px solid var(--rule); border-radius:8px; background:#000; }
 .prose :is(h2, h3, h4) { scroll-margin-top:80px; }
 .prose .anchor { color:var(--muted); text-decoration:none; font-weight:400; opacity:0; }
 .prose :is(h2, h3, h4):hover .anchor, .prose .anchor:focus { opacity:1; }
