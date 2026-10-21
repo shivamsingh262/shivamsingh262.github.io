@@ -1,5 +1,5 @@
 ---
-title: "Code computes, the LLM interprets: keeping made-up numbers out of an AI analyst"
+title: Code computes, the LLM interprets: keeping made-up numbers out of an AI analyst
 date: 2026-10-21
 description: How I stopped an LLM marketing analyst from writing numbers it didn't compute, and the five places they still slipped through.
 ---

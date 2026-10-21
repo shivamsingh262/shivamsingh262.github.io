@@ -1,5 +1,5 @@
 ---
-title: "When an LLM hits its output cap: cut-off JSON, a quiet fallback and a 6-minute scan"
+title: When an LLM hits its output cap: cut-off JSON, a quiet fallback and a 6-minute scan
 date: 2026-10-21
 description: A 41-finding scan outgrew the model's output limit and quietly switched providers. Splitting the work fixed it, and splitting it too far broke something else.
 ---
