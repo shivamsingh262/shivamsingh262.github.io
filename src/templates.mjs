@@ -38,6 +38,7 @@ const LANGUAGE_COLORS = {
 };
 
 const linkedinOf = (r) => (typeof r.linkedin === 'string' ? { url: r.linkedin } : r.linkedin);
+export const sameAs = (config, resume) => [`https://github.com/${config.githubUser}`, linkedinOf(resume)?.url].filter(Boolean);
 const monthYear = (iso) => new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 const longDate = (ymd) => new Date(`${ymd}T00:00:00Z`).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
@@ -279,12 +280,30 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
 }
 `;
 
+// [2025, 0] -> "2025-01"
+const ym = ([y, m]) => `${y}-${String(m + 1).padStart(2, '0')}`;
+const orgId = (config, name) => `${config.url}/#org-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+
+// Jobs from resume.json as EmployeeRoles, either the ones that have ended or the current ones.
+function roles(config, resume, property, ended) {
+  return resume.experience.flatMap((job) => {
+    const span = parseDates(job.dates);
+    if (!span || Boolean(span.end) !== ended) return [];
+    return [{
+      '@type': 'EmployeeRole',
+      roleName: job.title,
+      startDate: ym(span.start),
+      endDate: span.end ? ym(span.end) : undefined,
+      [property]: { '@type': 'Organization', '@id': orgId(config, job.company), name: job.company },
+    }];
+  });
+}
+
 // Structured data for the home page: the profile page, the person it's about
 // and the site, linked by @id so search engines treat them as one entity.
 // alternateName, the company URL and the city help tell this Shivam Singh
 // apart from others with the same name.
 function jsonLd({ config, resume }) {
-  const li = linkedinOf(resume);
   const person = `${config.url}/#person`;
   const company = resume.experience[0]?.company;
   const data = {
@@ -319,10 +338,15 @@ function jsonLd({ config, resume }) {
       image: { '@type': 'ImageObject', '@id': `${config.url}/#photo`, url: `${config.url}/photo-1200.webp`, contentUrl: `${config.url}/photo-1200.webp`, width: 1200, height: 1200, caption: `Portrait of ${resume.name}` },
       email: resume.email ? `mailto:${resume.email}` : undefined,
       address: resume.location ? { '@type': 'PostalAddress', addressLocality: resume.location.split(',')[0].trim(), addressCountry: 'IN' } : undefined,
-      worksFor: company ? { '@type': 'Organization', name: company, alternateName: config.companyAlternateName, url: config.companyUrl } : undefined,
-      alumniOf: resume.education.map((e) => ({ '@type': 'CollegeOrUniversity', name: e.school })),
+      // Each job is a dated schema.org Role wrapping its employer: current jobs
+      // under worksFor (after the plain Organization, for parsers that don't
+      // read roles), past ones under alumniOf next to the school.
+      worksFor: company
+        ? [{ '@type': 'Organization', '@id': orgId(config, company), name: company, alternateName: config.companyAlternateName, url: config.companyUrl }, ...roles(config, resume, 'worksFor', false)]
+        : undefined,
+      alumniOf: [...resume.education.map((e) => ({ '@type': 'CollegeOrUniversity', name: e.school })), ...roles(config, resume, 'alumniOf', true)],
       knowsAbout: [...new Set(resume.skills.flatMap((g) => g.items.join(', ').split(',').map((s) => s.trim()).filter(Boolean)))],
-      sameAs: [`https://github.com/${config.githubUser}`, li?.url].filter(Boolean),
+      sameAs: sameAs(config, resume),
       },
     ],
   };
@@ -341,10 +365,15 @@ function noteLd({ config, resume }, note, url, image) {
         description: note.description,
         datePublished: note.date,
         dateModified: note.updated || note.date,
+        inLanguage: 'en',
+        keywords: note.keywords || undefined,
+        wordCount: wordCount(note.body),
         url,
         mainEntityOfPage: url,
+        isPartOf: { '@id': `${config.url}/#website` },
         image,
-        author: { '@type': 'Person', '@id': `${config.url}/#person`, name: resume.name, url: `${config.url}/` },
+        encoding: { '@type': 'MediaObject', contentUrl: `${config.url}/notes/${note.slug}.md`, encodingFormat: 'text/markdown' },
+        author: { '@type': 'Person', '@id': `${config.url}/#person`, name: resume.name, url: `${config.url}/`, sameAs: sameAs(config, resume) },
       },
       {
         '@type': 'BreadcrumbList',
@@ -358,6 +387,32 @@ function noteLd({ config, resume }, note, url, image) {
   };
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
+
+// Structured data for the notes index: the page and the notes on it, in order.
+function notesIndexLd({ config, resume, notes }, url) {
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': url,
+    url,
+    name: `Notes · ${resume.name}`,
+    inLanguage: 'en',
+    isPartOf: { '@id': `${config.url}/#website` },
+    author: { '@id': `${config.url}/#person` },
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: notes.map((n, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        item: { '@type': 'BlogPosting', headline: n.title, description: n.description, datePublished: n.date, url: `${config.url}/notes/${n.slug}/` },
+      })),
+    },
+  };
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
+// Words of prose, leaving out code blocks and inline HTML.
+const wordCount = (md) => md.replace(/```[\s\S]*?```/g, ' ').replace(/<[^>]+>/g, ' ').match(/[\p{L}\p{N}]\S*/gu)?.length || 0;
 
 export function renderPage(ctx, page) {
   const { config, resume, notes } = ctx;
@@ -400,12 +455,14 @@ ${page.note ? `<meta property="article:published_time" content="${page.note.date
 <meta name="theme-color" content="#0e131d" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+${page.note ? `<link rel="alternate" type="text/markdown" href="/notes/${esc(page.note.slug)}.md">` : ''}
 ${notes.length ? `<link rel="alternate" type="application/rss+xml" title="${esc(`${resume.name}: Notes`)}" href="/feed.xml">` : ''}
 <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>${CSS}</style>
 ${page.motion ? `<script>if (matchMedia('(prefers-reduced-motion: no-preference)').matches) document.documentElement.classList.add('motion');</script>` : ''}
 ${page.home ? `<script type="application/ld+json">${jsonLd(ctx)}</script>` : ''}
 ${page.note ? `<script type="application/ld+json">${noteLd(ctx, page.note, url, image)}</script>` : ''}
+${page.notesIndex && notes.length ? `<script type="application/ld+json">${notesIndexLd(ctx, url)}</script>` : ''}
 ${config.goatcounter ? `<script data-goatcounter="https://${esc(config.goatcounter)}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>` : ''}
 </head>
 <body>

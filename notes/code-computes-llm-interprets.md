@@ -2,6 +2,7 @@
 title: Stopping an LLM from making up numbers in an AI analyst
 date: 2026-10-21
 description: How I stopped an LLM marketing analyst from writing numbers it didn't compute, and the five places they still slipped through.
+keywords: LLM, AI agents, hallucination, grounding, marketing analytics
 ---
 
 I lead the build of an AI analyst for e-commerce marketing teams. You ask it

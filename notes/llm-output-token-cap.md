@@ -2,6 +2,7 @@
 title: LLM output token limit: truncated JSON and a silent fallback
 date: 2026-10-21
 description: A 41-finding scan outgrew the model's output limit and quietly switched providers. Splitting the work fixed it, and splitting it too far broke something else.
+keywords: LLM, output token limit, max_tokens, structured output, AI agents
 ---
 
 Our AI marketing analyst has a "health scan": it runs a set of checks across a

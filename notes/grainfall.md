@@ -2,6 +2,7 @@
 title: How a falling-sand simulation works, with a playable demo
 date: 2026-10-21
 description: Grainfall is a small C++ falling-sand sandbox. Here's how sand, water, smoke and fire come out of a grid of cells and a few local rules, and you can play it right here.
+keywords: falling sand, cellular automata, C++, WebAssembly, raylib
 ---
 
 [Grainfall](https://github.com/shivamsingh262/grainfall) is a falling-sand

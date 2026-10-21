@@ -8,11 +8,13 @@ the URL (`/notes/agent-memory/`). Start it with front matter:
 title: What I learned building memory for AI agents
 date: 2026-10-20
 description: One sentence shown in search results, the notes list and the RSS feed.
+keywords: AI agents, agent memory, LLM
 ---
 
 Your post in Markdown...
 ```
 
+`keywords` is optional and only goes into the page's structured data.
 Add `draft: true` to the front matter to keep a note out of the site until it's
 ready. When you revise a published note, add `updated: YYYY-MM-DD` so search
 engines and the sitemap know it changed; the page shows it too.
@@ -24,6 +26,7 @@ engines and the sitemap know it changed; the page shows it too.
   reference them as `![What the diagram shows](/notes/agent-memory/diagram.png)`.
   Alt text is required, and the build fills in each local image's size.
 - `npm run og` makes each note its own share image with the title on it. Push to `main` and the site rebuilds; the note appears on the home page,
-on `/notes/`, in `feed.xml` and in `sitemap.xml`.
+on `/notes/`, in `feed.xml`, `sitemap.xml` and `llms.txt`, and as Markdown at
+`/notes/<slug>.md`.
 
 This README itself is never published.

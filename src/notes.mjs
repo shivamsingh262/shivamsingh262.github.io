@@ -5,6 +5,7 @@
 //   date: 2026-10-18
 //   updated: 2026-11-02          (optional, when the note was last revised)
 //   description: One sentence for search results and the feed.
+//   keywords: llm, agents       (optional, for the page's structured data)
 //   draft: true                  (optional, keeps the note off the site)
 //   ---
 
@@ -15,7 +16,7 @@ const ROOT = path.resolve(import.meta.dirname, '..');
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 // Returns published notes, newest first, as { slug, title, date, updated?,
-// description, body } where body is the raw Markdown after the front matter.
+// description, keywords?, body } where body is the raw Markdown after the front matter.
 export async function loadNotes() {
   const dir = path.join(ROOT, 'notes');
   const files = (await fs.readdir(dir)).filter((f) => f.endsWith('.md') && f !== 'README.md');

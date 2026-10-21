@@ -132,6 +132,36 @@ ${items}
 `;
 }
 
+// A Markdown copy of each note at /notes/<slug>.md, for AI tools and anyone
+// who wants the source. Site-relative links are made absolute so the file
+// still works when it's read on its own.
+function noteMarkdown(config, resume, note) {
+  const body = note.body.trim().replace(/\]\(\/(?!\/)/g, `](${config.url}/`).replace(/(href|src)="\/(?!\/)/g, `$1="${config.url}/`);
+  const dates = `Published ${note.date}${note.updated ? `, updated ${note.updated}` : ''}`;
+  return `# ${note.title}\n\n> ${note.description}\n\nBy ${resume.name}. ${dates}. Canonical page: ${config.url}/notes/${note.slug}/\n\n${body}\n`;
+}
+
+// /llms.txt (https://llmstxt.org): a short Markdown guide to the site for
+// language models, linking to the Markdown copy of each note.
+function llmsTxt(config, resume, projects, notes) {
+  const list = (items) => items.map(([title, url, desc]) => `- [${title}](${url})${desc ? `: ${desc}` : ''}`).join('\n');
+  const sections = [
+    `# ${resume.name}`,
+    `> ${config.description}`,
+    resume.summary,
+    `## Profile\n\n${list([
+      ['Home page', `${config.url}/`, 'experience, open source projects, skills and education'],
+      ['Resume (PDF)', `${config.url}/resume.pdf`],
+      ['GitHub', `https://github.com/${config.githubUser}`],
+      ...(resume.linkedin?.url ? [['LinkedIn', resume.linkedin.url]] : []),
+    ])}`,
+    notes.length && `## Notes\n\n${list(notes.map((n) => [n.title, `${config.url}/notes/${n.slug}.md`, n.description]))}`,
+    `## Open source projects\n\n${list(projects.map((p) => [p.name, p.url, p.description]))}`,
+    `## Optional\n\n${list([['RSS feed', `${config.url}/feed.xml`, 'full text of every note']])}`,
+  ];
+  return `${sections.filter(Boolean).join('\n\n')}\n`;
+}
+
 // The home page's lastmod is the date of the latest commit, not the build
 // date, so the weekly rebuild doesn't claim a change that didn't happen.
 function lastCommitDate(fallback) {
@@ -187,6 +217,7 @@ async function main() {
       description: `Notes by ${resume.name} on AI agents, data infrastructure and developer tools.`,
       body: renderNotesIndex(ctx),
       noindex: !notes.length,
+      notesIndex: true,
     })
   );
   for (const note of notes) {
@@ -203,10 +234,12 @@ async function main() {
         note,
       })
     );
+    await write(`notes/${note.slug}.md`, noteMarkdown(config, resume, note));
   }
   await write('404.html', renderPage(ctx, { path: '/404.html', title: `Not found · ${resume.name}`, body: render404(), noindex: true, motion: true }));
   await write('feed.xml', feed(config, resume, notes));
   await write('sitemap.xml', sitemap(config, notes, today));
+  await write('llms.txt', llmsTxt(config, resume, projects, notes));
   await write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${config.url}/sitemap.xml\n`);
 
   console.log(`Built dist/ with ${projects.length} projects and ${notes.length} notes`);
