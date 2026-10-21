@@ -21,6 +21,8 @@ jobs:
   build:
     # Pinned because the sandbox step below is specific to Ubuntu 24.04.
     runs-on: ubuntu-24.04
+    outputs:
+      indexnow: ${{ steps.indexnow.outputs.body }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/checkout@v5
@@ -53,6 +55,11 @@ jobs:
         run: npm run og
         env:
           PUPPETEER_FROM: .builder
+      # Compared against the live sitemap now, before this build replaces it.
+      - name: List changed pages for IndexNow
+        id: indexnow
+        run: echo "body=$(node src/indexnow.mjs)" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
@@ -67,3 +74,13 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v5
+      # After deploying, so the key file is live when search engines check it.
+      - name: Submit changed pages to IndexNow
+        if: needs.build.outputs.indexnow != ''
+        run: |
+          curl -sS --fail-with-body -X POST https://api.indexnow.org/indexnow \
+            -H 'Content-Type: application/json; charset=utf-8' \
+            --data "$BODY"
+        env:
+          BODY: ${{ needs.build.outputs.indexnow }}
+        continue-on-error: true

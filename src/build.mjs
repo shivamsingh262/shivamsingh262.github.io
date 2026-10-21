@@ -240,6 +240,8 @@ async function main() {
   await write('feed.xml', feed(config, resume, notes));
   await write('sitemap.xml', sitemap(config, notes, today));
   await write('llms.txt', llmsTxt(config, resume, projects, notes));
+  // IndexNow checks this file to confirm the site owns the key; see src/indexnow.mjs.
+  if (config.indexNowKey) await write(`${config.indexNowKey}.txt`, config.indexNowKey);
   await write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${config.url}/sitemap.xml\n`);
 
   console.log(`Built dist/ with ${projects.length} projects and ${notes.length} notes`);

@@ -12,6 +12,7 @@
     "pdf": "node ${BUILDER:-../resume}/build-pdf.js --config data/resume.json --page-size a4 --out-dir .pdf --name resume && cp .pdf/resume.pdf dist/resume.pdf",
     "og": "node src/og.mjs",
     "build:all": "npm run build && npm run pdf && npm run og",
+    "indexnow": "node src/indexnow.mjs",
     "serve": "python3 -m http.server 8000 --directory dist"
   },
   "dependencies": {
