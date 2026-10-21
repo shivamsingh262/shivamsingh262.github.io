@@ -99,4 +99,8 @@ Retries add latency.
 I'll take that trade every time. Users have to trust the numbers before the
 interpretation is worth anything to them.
 
+I've released the core of this as an open-source Python library,
+[factguard](https://github.com/shivamsingh262/factguard): fact placeholders,
+the validator with its date windows, the single retry and dropping the sentence.
+
 *Related: [When an LLM hits its output cap](/notes/llm-output-token-cap/), on what happened when one of these interpretation calls outgrew its token limit.*

@@ -1,9 +1,28 @@
 [
   {
+    "name": "factguard",
+    "url": "https://github.com/shivamsingh262/factguard",
+    "homepage": "https://shivamsingh262.github.io/notes/code-computes-llm-interprets/",
+    "description": "Keep LLM-written text free of numbers your code didn't compute: fact placeholders, a strict validator, one retry, then drop the sentence",
+    "language": "Python",
+    "stars": 0,
+    "topics": [
+      "ai-agents",
+      "grounding",
+      "guardrails",
+      "hallucination",
+      "llm",
+      "llm-evaluation",
+      "marketing-analytics",
+      "python"
+    ],
+    "pushedAt": "2026-10-21T07:10:33Z"
+  },
+  {
     "name": "tailyard",
     "url": "https://github.com/shivamsingh262/tailyard",
     "homepage": null,
-    "description": "One terminal for your local dev stack: logs, HTTP traffic, browser console and Redis queues",
+    "description": "Terminal UI for your local dev stack: logs, HTTP traffic, browser console and Redis queues in one screen",
     "language": "Go",
     "stars": 0,
     "topics": [
@@ -37,7 +56,7 @@
     "name": "resume-pdf-builder",
     "url": "https://github.com/shivamsingh262/resume-pdf-builder",
     "homepage": null,
-    "description": "Generate a polished, multi-page-safe resume PDF from a JSON file using HTML/CSS themes and headless Chromium.",
+    "description": "Build a print-ready resume PDF from a JSON file with HTML/CSS themes, Puppeteer and headless Chromium",
     "language": "JavaScript",
     "stars": 0,
     "topics": [
@@ -74,13 +93,13 @@
       "sandbox-game",
       "simulation"
     ],
-    "pushedAt": "2026-10-18T10:16:09Z"
+    "pushedAt": "2026-10-21T06:25:47Z"
   },
   {
     "name": "3dwallrender",
     "url": "https://github.com/shivamsingh262/3dwallrender",
     "homepage": "https://3dwallrender.vercel.app",
-    "description": "3D wall render with anime.js",
+    "description": "Procedural 3D block wall from a numeric matrix, in plain JS, SVG and anime.js, with themes and animation presets",
     "language": "JavaScript",
     "stars": 0,
     "topics": [
@@ -95,7 +114,7 @@
     "name": "homebrew-tap",
     "url": "https://github.com/shivamsingh262/homebrew-tap",
     "homepage": null,
-    "description": "Homebrew tap for shivamsingh262's tools",
+    "description": "Homebrew tap for tailyard: one terminal for local dev stack logs, HTTP traffic, browser console and Redis queues",
     "language": "Ruby",
     "stars": 0,
     "topics": [
