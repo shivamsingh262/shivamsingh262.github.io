@@ -1,6 +1,6 @@
 # shivamsingh262.github.io
 
-Source for [shivamsingh262.github.io](https://shivamsingh262.github.io), my
+Source for [shivamsingh262.com](https://shivamsingh262.com), my
 portfolio site. It's generated from the same JSON that builds my resume PDF,
 plus live data about my GitHub projects.
 
