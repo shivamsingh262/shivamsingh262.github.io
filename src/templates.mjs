@@ -245,6 +245,10 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
 .prose pre code { background:none; padding:0; }
 .prose blockquote { border-left:3px solid var(--rule); padding-left:14px; color:var(--muted); }
 .prose img { max-width:100%; height:auto; border-radius:8px; }
+.prose :is(h2, h3, h4) { scroll-margin-top:80px; }
+.prose .anchor { color:var(--muted); text-decoration:none; font-weight:400; opacity:0; }
+.prose :is(h2, h3, h4):hover .anchor, .prose .anchor:focus { opacity:1; }
+@media (hover: none) { .prose .anchor { opacity:0.5; } }
 
 .site-footer { border-top:1px solid var(--rule); margin-top:24px; padding:24px 0 40px; font-size:14px; color:var(--muted); }
 .site-footer .wrap { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px 20px; }
@@ -325,18 +329,31 @@ function jsonLd({ config, resume }) {
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
 
-// Structured data for a note page.
-function noteLd({ config, resume }, note, url) {
+// Structured data for a note page: the post itself and its breadcrumb trail.
+function noteLd({ config, resume }, note, url, image) {
   const data = {
     '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: note.title,
-    description: note.description,
-    datePublished: note.date,
-    url,
-    mainEntityOfPage: url,
-    image: `${config.url}/og.png`,
-    author: { '@type': 'Person', '@id': `${config.url}/#person`, name: resume.name, url: `${config.url}/` },
+    '@graph': [
+      {
+        '@type': 'BlogPosting',
+        headline: note.title,
+        description: note.description,
+        datePublished: note.date,
+        dateModified: note.updated || note.date,
+        url,
+        mainEntityOfPage: url,
+        image,
+        author: { '@type': 'Person', '@id': `${config.url}/#person`, name: resume.name, url: `${config.url}/` },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          ['Home', `${config.url}/`],
+          ['Notes', `${config.url}/notes/`],
+          [note.title, url],
+        ].map(([name, item], i) => ({ '@type': 'ListItem', position: i + 1, name, item })),
+      },
+    ],
   };
   return JSON.stringify(data).replace(/</g, '\\u003c');
 }
@@ -346,6 +363,8 @@ export function renderPage(ctx, page) {
   const title = page.title || `${resume.name} · ${config.title || resume.title}`;
   const description = page.description || config.description;
   const url = `${config.url}${page.path}`;
+  const image = page.image || `${config.url}/og.png`;
+  const imageAlt = page.imageAlt || `${resume.name}, ${resume.title}`;
   const ogType = page.type || (page.home ? 'profile' : 'website');
   const base = page.home ? '' : '/';
   const nav = [['#about', 'About'], ['#experience', 'Experience'], ['#projects', 'Projects'], ['#skills', 'Skills']].map(([h, l]) => [base + h, l]);
@@ -365,16 +384,17 @@ ${page.noindex ? '<meta name="robots" content="noindex">' : `<meta name="robots"
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${esc(url)}">
-<meta property="og:image" content="${esc(config.url)}/og.png">
+<meta property="og:image" content="${esc(image)}">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="${esc(`${resume.name}, ${resume.title}`)}">
+<meta property="og:image:alt" content="${esc(imageAlt)}">
 ${ogType === 'profile' ? `<meta property="profile:first_name" content="${esc(resume.name.split(' ')[0])}">\n<meta property="profile:last_name" content="${esc(resume.name.split(' ').slice(1).join(' '))}">` : ''}
-${page.note ? `<meta property="article:published_time" content="${page.note.date}">` : ''}
+${page.note ? `<meta property="article:published_time" content="${page.note.date}">\n<meta property="article:modified_time" content="${page.note.updated || page.note.date}">\n<meta property="article:author" content="${esc(config.url)}/">` : ''}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(description)}">
-<meta name="twitter:image" content="${esc(config.url)}/og.png">
+<meta name="twitter:image" content="${esc(image)}">
+<meta name="twitter:image:alt" content="${esc(imageAlt)}">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e131d" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -384,7 +404,7 @@ ${notes.length ? `<link rel="alternate" type="application/rss+xml" title="${esc(
 <style>${CSS}</style>
 ${page.motion ? `<script>if (matchMedia('(prefers-reduced-motion: no-preference)').matches) document.documentElement.classList.add('motion');</script>` : ''}
 ${page.home ? `<script type="application/ld+json">${jsonLd(ctx)}</script>` : ''}
-${page.note ? `<script type="application/ld+json">${noteLd(ctx, page.note, url)}</script>` : ''}
+${page.note ? `<script type="application/ld+json">${noteLd(ctx, page.note, url, image)}</script>` : ''}
 ${config.goatcounter ? `<script data-goatcounter="https://${esc(config.goatcounter)}.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>` : ''}
 </head>
 <body>
@@ -628,7 +648,7 @@ export function renderNote({ resume }, note) {
   return `
 <article class="page">
   <h1>${esc(note.title)}</h1>
-  <p class="lede"><time datetime="${note.date}">${longDate(note.date)}</time> · ${esc(resume.name)}</p>
+  <p class="lede"><time datetime="${note.date}">${longDate(note.date)}</time>${note.updated ? ` · Updated <time datetime="${note.updated}">${longDate(note.updated)}</time>` : ''} · ${esc(resume.name)}</p>
   <div class="prose">${note.html}</div>
   <p class="more"><a href="/notes/">← All notes</a></p>
 </article>`;

@@ -8,8 +8,10 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { marked } from 'marked';
-import { renderPage, renderHome, renderNotesIndex, renderNote, render404 } from './templates.mjs';
+import { Marked } from 'marked';
+import { renderPage, renderHome, renderNotesIndex, renderNote, render404, esc } from './templates.mjs';
+import { loadNotes } from './notes.mjs';
+import { imageSize } from './image-size.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const DIST = path.join(ROOT, 'dist');
@@ -50,34 +52,55 @@ async function loadProjects(config) {
   }
 }
 
-// Notes are notes/<slug>.md with a small front matter block:
-//   ---
-//   title: Post title
-//   date: 2026-10-18
-//   description: One sentence for search results and the feed.
-//   ---
-async function loadNotes() {
-  const dir = path.join(ROOT, 'notes');
-  const files = (await fs.readdir(dir)).filter((f) => f.endsWith('.md') && f !== 'README.md');
-  const notes = [];
-  for (const file of files) {
-    const text = await fs.readFile(path.join(dir, file), 'utf8');
-    const match = text.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-    if (!match) throw new Error(`notes/${file}: missing front matter`);
-    const meta = Object.fromEntries(
-      match[1].split('\n').filter(Boolean).map((line) => {
-        const i = line.indexOf(':');
-        return [line.slice(0, i).trim(), line.slice(i + 1).trim()];
-      })
-    );
-    for (const key of ['title', 'date', 'description']) {
-      if (!meta[key]) throw new Error(`notes/${file}: front matter needs "${key}"`);
-    }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(meta.date)) throw new Error(`notes/${file}: date must be YYYY-MM-DD`);
-    if (meta.draft === 'true') continue;
-    notes.push({ ...meta, slug: file.replace(/\.md$/, ''), html: marked.parse(match[2]) });
+// Renders a note's Markdown. Headings get an id and a "#" link so sections can
+// be linked to (and shown as jump links in search results). Images need alt
+// text, and local ones get their width and height so the page doesn't shift
+// as they load.
+async function renderMarkdown(note) {
+  const file = `notes/${note.slug}.md`;
+  const ids = new Set();
+  const md = new Marked({
+    renderer: {
+      heading({ tokens, depth }) {
+        const inner = this.parser.parseInline(tokens);
+        const base = inner.replace(/<[^>]+>|&[^;]+;/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'section';
+        let id = base;
+        for (let n = 2; ids.has(id); n++) id = `${base}-${n}`;
+        ids.add(id);
+        return `<h${depth} id="${id}">${inner} <a class="anchor" href="#${id}" aria-label="Link to this section">#</a></h${depth}>\n`;
+      },
+      image({ href, title, text, size }) {
+        const dims = size ? ` width="${size.width}" height="${size.height}"` : '';
+        return `<img src="${esc(href)}" alt="${esc(text)}"${title ? ` title="${esc(title)}"` : ''}${dims} loading="lazy" decoding="async">`;
+      },
+    },
+  });
+  const tokens = md.lexer(note.body);
+  const images = [];
+  md.walkTokens(tokens, (t) => {
+    // The page already shows the title as its h1.
+    if (t.type === 'heading' && t.depth === 1) throw new Error(`${file}: use ## for headings, the title is already the page's h1 ("# ${t.text}")`);
+    if (t.type === 'image') images.push(t);
+  });
+  for (const img of images) {
+    if (!img.text.trim()) throw new Error(`${file}: image ${img.href} needs alt text, e.g. ![What it shows](${img.href})`);
+    // Local images live in static/ and are referenced from the site root.
+    if (!img.href.startsWith('/') || img.href.startsWith('//')) continue;
+    const local = path.join(ROOT, 'static', decodeURI(img.href.split(/[?#]/)[0]));
+    const buf = await fs.readFile(local).catch(() => {
+      throw new Error(`${file}: image ${img.href} not found at static${img.href}`);
+    });
+    img.size = imageSize(buf);
+    if (!img.size) console.warn(`${file}: couldn't read the size of ${img.href}`);
   }
-  return notes.sort((a, b) => (a.date < b.date ? 1 : -1));
+  return md.parser(tokens);
+}
+
+// Feed readers show the HTML outside the site, so links must be absolute.
+function absolute(html, config, note) {
+  return html
+    .replace(/(href|src)="\/(?!\/)/g, `$1="${config.url}/`)
+    .replace(/href="#/g, `href="${config.url}/notes/${note.slug}/#`);
 }
 
 const xmlEsc = (s) => String(s).replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' })[c]);
@@ -91,11 +114,12 @@ function feed(config, resume, notes) {
     <guid>${config.url}/notes/${n.slug}/</guid>
     <pubDate>${new Date(`${n.date}T00:00:00Z`).toUTCString()}</pubDate>
     <description>${xmlEsc(n.description)}</description>
+    <content:encoded><![CDATA[${absolute(n.html, config, n).replaceAll(']]>', ']]]]><![CDATA[>')}]]></content:encoded>
   </item>`
     )
     .join('\n');
   return `<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
 <channel>
   <title>${xmlEsc(`${resume.name}: Notes`)}</title>
   <link>${config.url}/notes/</link>
@@ -118,12 +142,14 @@ function lastCommitDate(fallback) {
   }
 }
 
+const modified = (note) => note.updated || note.date;
+
 function sitemap(config, notes, today) {
   const urls = [
     { loc: `${config.url}/`, lastmod: lastCommitDate(today) },
     // The notes index is left out (and noindexed) until there's a note on it.
-    ...(notes.length ? [{ loc: `${config.url}/notes/`, lastmod: notes[0].date }] : []),
-    ...notes.map((n) => ({ loc: `${config.url}/notes/${n.slug}/`, lastmod: n.date })),
+    ...(notes.length ? [{ loc: `${config.url}/notes/`, lastmod: notes.map(modified).sort().at(-1) }] : []),
+    ...notes.map((n) => ({ loc: `${config.url}/notes/${n.slug}/`, lastmod: modified(n) })),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -142,6 +168,7 @@ async function main() {
   const config = await readJson('site.config.json');
   const resume = await readJson('data/resume.json');
   const [projects, notes] = await Promise.all([loadProjects(config), loadNotes()]);
+  for (const note of notes) note.html = await renderMarkdown(note);
   const today = new Date().toISOString().slice(0, 10);
   const ctx = { config, resume, projects, notes };
 
@@ -170,6 +197,8 @@ async function main() {
         title: `${note.title} · ${resume.name}`,
         description: note.description,
         type: 'article',
+        image: `${config.url}/notes/${note.slug}/og.png`,
+        imageAlt: note.title,
         body: renderNote(ctx, note),
         note,
       })
