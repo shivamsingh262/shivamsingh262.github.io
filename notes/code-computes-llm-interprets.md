@@ -1,5 +1,5 @@
 ---
-title: Code computes, the LLM interprets: keeping made-up numbers out of an AI analyst
+title: Stopping an LLM from making up numbers in an AI analyst
 date: 2026-10-21
 description: How I stopped an LLM marketing analyst from writing numbers it didn't compute, and the five places they still slipped through.
 ---
@@ -97,3 +97,5 @@ Retries add latency.
 
 I'll take that trade every time. Users have to trust the numbers before the
 interpretation is worth anything to them.
+
+*Related: [When an LLM hits its output cap](/notes/llm-output-token-cap/), on what happened when one of these interpretation calls outgrew its token limit.*

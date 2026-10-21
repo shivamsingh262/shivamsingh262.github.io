@@ -1,5 +1,5 @@
 ---
-title: When an LLM hits its output cap: cut-off JSON, a quiet fallback and a 6-minute scan
+title: LLM output token limit: truncated JSON and a silent fallback
 date: 2026-10-21
 description: A 41-finding scan outgrew the model's output limit and quietly switched providers. Splitting the work fixed it, and splitting it too far broke something else.
 ---
@@ -53,7 +53,7 @@ Findings are now interpreted in **groups of 12**, all sent at once:
 
 - Each group's reply stays well inside the cap, however many findings a scan
   raises.
-- Each group gets its own validation and retry, so one bad group doesn't redo
+- Each group gets its own [number validation and retry](/notes/code-computes-llm-interprets/), so one bad group doesn't redo
   the other three.
 - Every group uses the same skill set, so the system prompts are identical and
   share the prompt cache.
@@ -92,3 +92,5 @@ for one). The same day, I reverted to groups.
 - **Parallel calls lose shared reasoning.** Splitting a prompt splits what the
   model can connect. Make each batch as small as the limit requires, and no
   smaller.
+
+*Related: [Stopping an LLM from making up numbers](/notes/code-computes-llm-interprets/), on the validation each of these groups runs.*
