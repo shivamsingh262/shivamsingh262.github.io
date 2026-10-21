@@ -434,6 +434,7 @@ export function renderPage(ctx, page) {
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
 <meta name="author" content="${esc(resume.name)}">
+${page.home && config.bingVerification ? `<meta name="msvalidate.01" content="${esc(config.bingVerification)}">` : ''}
 ${page.noindex ? '<meta name="robots" content="noindex">' : `<meta name="robots" content="max-image-preview:large">\n<link rel="canonical" href="${esc(url)}">`}
 <meta property="og:type" content="${ogType}">
 <meta property="og:site_name" content="${esc(resume.name)}">
