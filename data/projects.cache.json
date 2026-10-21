@@ -2,7 +2,7 @@
   {
     "name": "factguard",
     "url": "https://github.com/shivamsingh262/factguard",
-    "homepage": "https://shivamsingh262.github.io/notes/code-computes-llm-interprets/",
+    "homepage": "https://shivamsingh262.com/notes/code-computes-llm-interprets/",
     "description": "Keep LLM-written text free of numbers your code didn't compute: fact placeholders, a strict validator, one retry, then drop the sentence",
     "language": "Python",
     "stars": 0,
@@ -16,13 +16,13 @@
       "marketing-analytics",
       "python"
     ],
-    "pushedAt": "2026-10-21T07:20:58Z"
+    "pushedAt": "2026-10-21T08:04:16Z"
   },
   {
     "name": "tailyard",
     "url": "https://github.com/shivamsingh262/tailyard",
     "homepage": null,
-    "description": "Terminal UI for your local dev stack: logs, HTTP traffic, browser console and Redis queues in one screen",
+    "description": "Terminal UI for your local dev stack: logs, HTTP traffic, LLM calls, browser console and Redis queues in one screen",
     "language": "Go",
     "stars": 0,
     "topics": [
@@ -35,7 +35,7 @@
       "redis",
       "tui"
     ],
-    "pushedAt": "2026-10-18T10:16:11Z"
+    "pushedAt": "2026-10-21T07:54:54Z"
   },
   {
     "name": "moodline",
@@ -93,7 +93,7 @@
       "sandbox-game",
       "simulation"
     ],
-    "pushedAt": "2026-10-21T06:25:47Z"
+    "pushedAt": "2026-10-21T08:04:18Z"
   },
   {
     "name": "3dwallrender",
@@ -122,6 +122,6 @@
       "homebrew-cask",
       "homebrew-tap"
     ],
-    "pushedAt": "2026-10-18T09:14:55Z"
+    "pushedAt": "2026-10-21T07:56:51Z"
   }
 ]
