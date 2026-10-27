@@ -38,7 +38,8 @@ const LANGUAGE_COLORS = {
 };
 
 const linkedinOf = (r) => (typeof r.linkedin === 'string' ? { url: r.linkedin } : r.linkedin);
-export const sameAs = (config, resume) => [`https://github.com/${config.githubUser}`, linkedinOf(resume)?.url].filter(Boolean);
+// Other profiles (like PyPI) are listed under sameAs in site.config.json.
+export const sameAs = (config, resume) => [`https://github.com/${config.githubUser}`, linkedinOf(resume)?.url, ...(config.sameAs || [])].filter(Boolean);
 const monthYear = (iso) => new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 const longDate = (ymd) => new Date(`${ymd}T00:00:00Z`).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 
@@ -232,6 +233,7 @@ h2 { font:700 13px Inter, sans-serif; letter-spacing:0.12em; text-transform:uppe
 .notes-list a:hover { text-decoration:underline; }
 .notes-list p { color:var(--muted); font-size:15px; }
 .empty { color:var(--muted); }
+.related { margin-top:48px; padding-top:28px; border-top:1px solid var(--rule); max-width:70ch; }
 
 .page { padding:48px 0 24px; }
 .page h1 { font:700 clamp(28px, 5vw, 38px)/1.15 'Source Serif 4', Georgia, serif; color:var(--accent); }
@@ -703,12 +705,22 @@ export function renderNotesIndex({ notes }) {
 </div>`;
 }
 
-export function renderNote({ resume }, note) {
+// Up to three other notes, newest first, shown after a note so readers (and
+// crawlers) can move between them. Kept out of note.html, so the feed and the
+// Markdown copies don't get it.
+function relatedNotes(notes, note) {
+  const others = notes.filter((n) => n.slug !== note.slug).slice(0, 3);
+  if (!others.length) return '';
+  return `<section class="related" aria-labelledby="more-notes"><h2 id="more-notes">More notes</h2>${notesList(others)}</section>`;
+}
+
+export function renderNote({ resume, notes }, note) {
   return `
 <article class="page">
   <h1>${esc(note.title)}</h1>
   <p class="lede"><time datetime="${note.date}">${longDate(note.date)}</time>${note.updated ? ` · Updated <time datetime="${note.updated}">${longDate(note.updated)}</time>` : ''} · ${esc(resume.name)}</p>
   <div class="prose">${note.html}</div>
+  ${relatedNotes(notes, note)}
   <p class="more"><a href="/notes/">← All notes</a></p>
 </article>`;
 }

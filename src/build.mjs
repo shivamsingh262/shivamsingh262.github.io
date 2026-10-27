@@ -188,6 +188,22 @@ ${urls.map((u) => `  <url><loc>${u.loc}</loc><lastmod>${u.lastmod}</lastmod></ur
 `;
 }
 
+// HTML pages under static/notes/ (like the Grainfall demo) are only meant to
+// be seen inside a note's iframe, so they're kept out of search results on
+// their own. Added here rather than in the files so a fresh copy of a
+// generated page keeps it.
+async function noindexEmbeds() {
+  const dir = path.join(ROOT, 'static', 'notes');
+  const files = (await fs.readdir(dir, { recursive: true }).catch(() => [])).filter((f) => f.endsWith('.html'));
+  for (const rel of files) {
+    const file = path.join(DIST, 'notes', rel);
+    const html = await fs.readFile(file, 'utf8');
+    if (/<meta[^>]+name=["']?robots/i.test(html)) continue;
+    if (!/<head[^>]*>/i.test(html)) throw new Error(`static/notes/${rel}: no <head> to add the robots meta tag to`);
+    await fs.writeFile(file, html.replace(/<head[^>]*>/i, '$&<meta name="robots" content="noindex, indexifembedded">'));
+  }
+}
+
 async function write(rel, content) {
   const file = path.join(DIST, rel);
   await fs.mkdir(path.dirname(file), { recursive: true });
@@ -204,6 +220,7 @@ async function main() {
 
   await fs.rm(DIST, { recursive: true, force: true });
   await fs.cp(path.join(ROOT, 'static'), DIST, { recursive: true });
+  await noindexEmbeds();
   await fs.copyFile(path.join(ROOT, 'data', resume.photo), path.join(DIST, path.basename(resume.photo)));
   // Self-host anime.js next to static/js/motion.js, which imports it.
   await fs.copyFile(path.join(ROOT, 'node_modules', 'animejs', 'dist', 'bundles', 'anime.esm.min.js'), path.join(DIST, 'js', 'anime.esm.min.js'));
@@ -242,7 +259,21 @@ async function main() {
   await write('llms.txt', llmsTxt(config, resume, projects, notes));
   // IndexNow checks this file to confirm the site owns the key; see src/indexnow.mjs.
   if (config.indexNowKey) await write(`${config.indexNowKey}.txt`, config.indexNowKey);
-  await write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${config.url}/sitemap.xml\n`);
+  // Search engines skip the notes' Markdown copies: they duplicate the HTML
+  // pages and, unlike them, can't carry a canonical link, so Google can pick
+  // them as the canonical. Other crawlers (the llms.txt audience) still get them.
+  await write('robots.txt', [
+    'User-agent: Googlebot',
+    'User-agent: Bingbot',
+    'Disallow: /notes/*.md$',
+    'Allow: /',
+    '',
+    'User-agent: *',
+    'Allow: /',
+    '',
+    `Sitemap: ${config.url}/sitemap.xml`,
+    '',
+  ].join('\n'));
 
   console.log(`Built dist/ with ${projects.length} projects and ${notes.length} notes`);
 }

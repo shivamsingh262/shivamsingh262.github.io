@@ -5,7 +5,7 @@
     "homepage": "https://shivamsingh262.com/notes/code-computes-llm-interprets/",
     "description": "Keep LLM-written text free of numbers your code didn't compute: fact placeholders, a strict validator, one retry, then drop the sentence",
     "language": "Python",
-    "stars": 0,
+    "stars": 1,
     "topics": [
       "ai-agents",
       "grounding",
@@ -16,12 +16,12 @@
       "marketing-analytics",
       "python"
     ],
-    "pushedAt": "2026-10-21T08:04:16Z"
+    "pushedAt": "2026-10-22T08:04:02Z"
   },
   {
     "name": "tailyard",
     "url": "https://github.com/shivamsingh262/tailyard",
-    "homepage": null,
+    "homepage": "https://shivamsingh262.com/notes/tailyard/",
     "description": "Terminal UI for your local dev stack: logs, HTTP traffic, LLM calls, browser console and Redis queues in one screen",
     "language": "Go",
     "stars": 0,
@@ -40,10 +40,10 @@
   {
     "name": "moodline",
     "url": "https://github.com/shivamsingh262/moodline",
-    "homepage": null,
+    "homepage": "https://shivamsingh262.com/notes/claude-code-status-line/",
     "description": "A Claude Code status line with cost, limits, cache timer and a mood-aware avatar",
     "language": "Shell",
-    "stars": 0,
+    "stars": 1,
     "topics": [
       "bash",
       "claude-code",
@@ -55,7 +55,7 @@
   {
     "name": "resume-pdf-builder",
     "url": "https://github.com/shivamsingh262/resume-pdf-builder",
-    "homepage": null,
+    "homepage": "https://shivamsingh262.com/",
     "description": "Build a print-ready resume PDF from a JSON file with HTML/CSS themes, Puppeteer and headless Chromium",
     "language": "JavaScript",
     "stars": 0,
@@ -72,7 +72,7 @@
   {
     "name": "grainfall",
     "url": "https://github.com/shivamsingh262/grainfall",
-    "homepage": null,
+    "homepage": "https://shivamsingh262.com/notes/grainfall/",
     "description": "A small falling-sand sandbox in C++20 with raylib: sand, water, fire, smoke and more",
     "language": "C++",
     "stars": 0,
