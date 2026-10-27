@@ -1,8 +1,8 @@
 ---
-title: A terminal UI for local dev: logs, HTTP requests, LLM calls and Redis queues in one screen
+title: A TUI for docker compose: logs, HTTP requests, LLM calls and Redis queues in one terminal
 date: 2026-10-27
 description: tailyard runs your docker compose stack and dev servers, records HTTP traffic and LLM API calls through two local proxies, captures the browser console and watches Redis queues, all in one terminal, filterable by request id.
-keywords: terminal UI, TUI, local development, docker compose logs, reverse proxy, LLM API, Redis streams, Go, Bubble Tea
+keywords: docker compose TUI, TUI, docker compose logs, lazydocker alternative, LLM API proxy, reverse proxy, Redis streams, Go, Bubble Tea
 ---
 
 A bug in a local stack usually crosses several windows. The browser shows an
@@ -124,7 +124,7 @@ show up in the Browser tab, and in the All tab alongside the logs and requests.
 One side effect: DevTools now shows the wrapper as the source of every console
 message. Adding `/__tailyard/` to DevTools' ignore list fixes that.
 
-## LLM calls: a second proxy
+## LLM calls: a recording LLM API proxy
 
 The LLM tab came in v0.2.0. A second proxy, on port 8898, forwards
 `/anthropic/...` to the Anthropic API and `/openai/...` to OpenAI (Ollama,
@@ -219,6 +219,15 @@ Press `f` on any entry and its id is pinned: every tab shows only what mentions
 it. The access log line, the request and its body, the worker's log, and the
 LLM call it made are all filtered down to that one request. If the Redis tail is a glob like
 `events:*`, the tail switches to that id's stream too.
+
+## How it differs from lazydocker
+
+[lazydocker](https://github.com/jesseduffield/lazydocker) manages containers:
+start, stop and restart them, see their stats, and read each one's logs. It's
+the better tool for that, and tailyard doesn't touch images or volumes.
+tailyard is for following one request: it shows logs from compose services and
+plain commands side by side, and adds what Docker can't see, the HTTP bodies,
+the browser console, the LLM calls and the Redis queues.
 
 ## What it doesn't do
 

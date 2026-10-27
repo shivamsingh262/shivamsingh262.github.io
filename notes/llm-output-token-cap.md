@@ -1,8 +1,8 @@
 ---
-title: LLM output token limit: truncated JSON and a silent fallback
+title: LLM output token limit: stop_reason max_tokens, truncated JSON and a silent fallback
 date: 2026-10-21
-description: A 41-finding scan outgrew the model's output limit and quietly switched providers. Splitting the work fixed it, and splitting it too far broke something else.
-keywords: LLM, output token limit, max_tokens, structured output, AI agents
+description: A 41-finding scan outgrew the model's output limit, stopped with stop_reason max_tokens, and quietly switched providers. Splitting the work fixed it, and splitting it too far broke something else.
+keywords: LLM output token limit, stop_reason max_tokens, finish_reason length, max_completion_tokens, truncated JSON, structured output
 ---
 
 Our AI marketing analyst has a "health scan": it runs a set of checks across a
@@ -47,6 +47,13 @@ tells you why it stopped (`stop_reason: "max_tokens"`), so:
 - **Retrying the same request on the same provider is pointless**, because it
   will hit the same cap. For batched calls, a cut-off reply goes straight to the
   fallback instead of a live retry that is bound to fail the same way.
+
+Other providers report the same thing differently. OpenAI's Chat Completions API
+returns `finish_reason: "length"`, and its Responses API marks the reply
+`incomplete` with the reason `max_output_tokens`. In Chat Completions the cap
+is now `max_completion_tokens`: the older `max_tokens` is deprecated and isn't
+accepted by reasoning models, whose hidden reasoning tokens count against the
+cap too. A reasoning model can hit it after writing very little visible text.
 
 ## Fix 2: split the work into groups
 
@@ -94,4 +101,4 @@ for one). The same day, I reverted to groups.
   model can connect. Make each batch as small as the limit requires, and no
   smaller.
 
-*Related: [Stopping an LLM from making up numbers](/notes/code-computes-llm-interprets/), on the validation each of these groups runs.*
+*Related: [Stopping an LLM from hallucinating numbers](/notes/code-computes-llm-interprets/), on the validation each of these groups runs.*

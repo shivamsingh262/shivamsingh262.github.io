@@ -1,16 +1,16 @@
 ---
-title: How a falling-sand simulation works, with a playable demo
+title: Falling sand game in C++: how the simulation works (play it here)
 date: 2026-10-21
-description: Grainfall is a small C++ falling-sand sandbox. Here's how sand, water, smoke and fire come out of a grid of cells and a few local rules, and you can play it right here.
-keywords: falling sand, cellular automata, C++, WebAssembly, raylib
+description: Grainfall is a small falling sand game in C++. Here's how sand, water, smoke and fire come out of a grid of cells and a few local rules, and you can play it right here.
+keywords: falling sand game, falling sand simulation, cellular automata, C++, WebAssembly, raylib
 ---
 
-[Grainfall](https://github.com/shivamsingh262/grainfall) is a falling-sand
-sandbox I wrote in C++20 with [raylib](https://www.raylib.com/). You pour sand,
+[Grainfall](https://github.com/shivamsingh262/grainfall) is a falling sand
+game I wrote in C++20 with [raylib](https://www.raylib.com/). You pour sand,
 flood it with water, build stone walls and set wooden forests on fire. This page
 runs the same code, compiled to WebAssembly:
 
-<iframe src="/notes/grainfall/grainfall.html" title="Grainfall falling-sand sandbox" loading="lazy"></iframe>
+<iframe src="/notes/grainfall/grainfall.html" title="Grainfall falling sand game" loading="lazy"></iframe>
 
 *Click the game first so it receives key presses. Left mouse paints, right mouse
 erases, `1`–`7` picks an element, the mouse wheel sets the brush size, `Space`

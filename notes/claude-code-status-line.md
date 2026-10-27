@@ -1,13 +1,13 @@
 ---
-title: A Claude Code status line with cost, usage limits and a cache timer
+title: Claude Code status line: usage limits, context, cost and a cache timer
 date: 2026-10-27
-description: moodline is a custom Claude Code status line in bash and jq. It shows session cost, 5-hour and weekly limits, when the prompt cache goes cold, and a kaomoji whose mood follows your repo.
-keywords: Claude Code, Claude Code status line, statusline, Claude Code cost, Claude Code usage limits, prompt cache, bash, jq
+description: moodline is a Claude Code status line in bash and jq, with setup steps and example output. It shows context and token usage, session cost, 5-hour and weekly usage limits, and when the prompt cache goes cold.
+keywords: Claude Code status line, Claude Code statusline, status line examples, Claude Code usage limits, Claude Code token usage, Claude Code context usage, Claude Code prompt cache, bash, jq
 ---
 
 [moodline](https://github.com/shivamsingh262/moodline) is a status line for
 Claude Code. It's two bash scripts and an installer, and it prints up to four
-lines under the prompt:
+lines under the prompt. Here's example output:
 
 ```text
 ╭─ (ง •̀_•́)ง you@mac ~/code/app (main) · Opus 5.5 · effort:medium · ⚡fast
@@ -17,8 +17,8 @@ lines under the prompt:
 ```
 
 The first line says where you are and which model you're on. The second shows
-how much of the context window, the 5-hour limit and the weekly limit you've
-used, with reset times. The third shows how long the session has run, what it
+usage: how much of the context window, the 5-hour limit and the weekly limit
+you've used, with reset times. The third shows how long the session has run, what it
 has cost, and how long the prompt cache stays warm. The last is the session
 name. The face at the start changes with what's going on.
 
@@ -171,7 +171,7 @@ cache expired, the cold state was never reached, and I only noticed when
 testing with an expired timestamp. That's why the test fixtures now pin the
 clock and cover warm, cold and missing data.
 
-## Install
+## Setup
 
 You need `bash`, `jq` and `git`, on macOS or Linux.
 

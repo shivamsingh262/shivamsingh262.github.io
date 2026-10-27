@@ -1,8 +1,8 @@
 ---
-title: Stopping an LLM from making up numbers in an AI analyst
+title: How to stop an LLM hallucinating numbers in data analysis
 date: 2026-10-21
-description: How I stopped an LLM marketing analyst from writing numbers it didn't compute, and the five places they still slipped through.
-keywords: LLM, AI agents, hallucination, grounding, marketing analytics
+description: How I stopped an LLM marketing analyst from hallucinating numbers it didn't compute, and the five places they still slipped through.
+keywords: LLM hallucination, prevent LLM hallucinations, AI analyst, grounding, AI marketing analytics
 ---
 
 I lead the build of an AI analyst for e-commerce marketing teams. You ask it
@@ -48,7 +48,7 @@ After each LLM call, a validator reads the text:
 The eval suite checks for zero ungrounded numbers on every recorded question,
 not just for the "right" answer.
 
-## The audit: five places numbers still got through
+## The audit: five places hallucinated numbers still got through
 
 Placeholders covered the obvious case. When I audited every LLM call in the
 pipeline, five places still let an LLM-written or LLM-chosen number through:
